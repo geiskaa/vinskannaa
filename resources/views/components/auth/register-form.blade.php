@@ -63,7 +63,7 @@
             <div class="ml-3 text-sm">
                 <label for="terms" class="text-gray-700">
                     By clicking 'Log In' you agree to our website
-                    <a href="{{ route('terms') }}" class="text-blue-600 hover:text-blue-500">Terms & Conditions</a>.
+                    <a href="" class="text-blue-600 hover:text-blue-500">Terms & Conditions</a>.
                 </label>
                 @error('terms')
                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
