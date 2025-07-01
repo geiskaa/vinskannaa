@@ -9,22 +9,38 @@
             @forelse ($products as $product)
                 <div class="bg-white rounded-lg shadow-sm overflow-hidden group hover:shadow-md transition-shadow">
                     <div class="aspect-square bg-gray-200 relative overflow-hidden">
-                        <!-- Favorite Button -->
+                        <!-- Action Buttons Container - DIPERBAIKI -->
                         @auth
-                            <button onclick="toggleFavorite({{ $product->id }})"
-                                class="absolute top-2 right-2 z-10 p-2 rounded-full bg-white bg-opacity-80 hover:bg-opacity-100 transition-all duration-200 shadow-sm hover:shadow-md favorite-btn transform hover:scale-110"
-                                data-product-id="{{ $product->id }}"
-                                data-is-favorited="{{ isset($product->is_favorited) && $product->is_favorited ? 'true' : 'false' }}">
-                                <svg class="w-5 h-5 transition-all duration-300 {{ isset($product->is_favorited) && $product->is_favorited ? 'text-red-500 fill-current scale-110' : 'text-gray-400' }}"
-                                    fill="{{ isset($product->is_favorited) && $product->is_favorited ? 'currentColor' : 'none' }}"
-                                    stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z">
-                                    </path>
-                                </svg>
-                            </button>
-                        @endauth
+                            <div class="absolute top-2 right-2 z-10 flex flex-col space-y-2">
+                                <!-- Favorite Button -->
+                                <button onclick="toggleFavorite({{ $product->id }})"
+                                    class="p-2 rounded-full bg-white bg-opacity-80 hover:bg-opacity-100 transition-all duration-200 shadow-sm hover:shadow-md favorite-btn transform hover:scale-110"
+                                    data-product-id="{{ $product->id }}"
+                                    data-is-favorited="{{ $product->is_favorited ? 'true' : 'false' }}">
+                                    <svg class="w-5 h-5 transition-all duration-300 {{ $product->is_favorited ? 'text-red-500 fill-current scale-110' : 'text-gray-400' }}"
+                                        fill="{{ $product->is_favorited ? 'currentColor' : 'none' }}" stroke="currentColor"
+                                        viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z">
+                                        </path>
+                                    </svg>
+                                </button>
 
+                                <!-- Cart Button -->
+                                <button onclick="toggleCart({{ $product->id }})"
+                                    class="p-2 rounded-full bg-white bg-opacity-80 hover:bg-opacity-100 transition-all duration-200 shadow-sm hover:shadow-md cart-btn transform hover:scale-110"
+                                    data-product-id="{{ $product->id }}"
+                                    data-in-cart="{{ $product->in_cart ? 'true' : 'false' }}"
+                                    {{ $product->stock !== null && $product->stock <= 0 ? 'disabled' : '' }}>
+                                    <svg class="w-5 h-5 transition-all duration-300 {{ $product->in_cart ? 'text-green-600 scale-110' : 'text-gray-400' }}"
+                                        fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13v6a2 2 0 002 2h6a2 2 0 002-2v-6m-8 0V9a2 2 0 012-2h4a2 2 0 012 2v4">
+                                        </path>
+                                    </svg>
+                                </button>
+                            </div>
+                        @endauth
                         @if ($product->image && (Str::startsWith($product->image, 'http') || Storage::disk('public')->exists($product->image)))
                             {{-- Gambar utama dari database (lokal atau URL) --}}
                             <img src="{{ Str::startsWith($product->image, 'http') ? $product->image : asset('storage/' . $product->image) }}"
@@ -124,15 +140,27 @@
     <div id="toast-container" class="fixed top-4 right-4 z-50 space-y-2"></div>
 
     <script>
+        document.addEventListener('DOMContentLoaded', function() {
+
+
+            document.querySelectorAll('.favorite-btn').forEach(btn => {
+                console.log('Favorite State:', btn.dataset.productId, btn.dataset.isFavorited);
+            });
+
+            document.querySelectorAll('.cart-btn').forEach(btn => {
+                console.log('Cart State:', btn.dataset.productId, btn.dataset.inCart);
+            });
+
+        });
+
         function toggleFavorite(productId) {
-            const btn = document.querySelector(`[data-product-id="${productId}"]`);
+            const btn = document.querySelector(`[data-product-id="${productId}"].favorite-btn`);
             const icon = btn.querySelector('svg');
             const currentIsFavorited = btn.getAttribute('data-is-favorited') === 'true';
+            console.log(`Product ID: ${productId}, is_favorited: ${currentIsFavorited}`); // ✅ Console log
 
             // Disable button temporarily
             btn.disabled = true;
-
-            // Add loading animation
             btn.classList.add('animate-pulse');
 
             fetch(`/favorites/${productId}/toggle`, {
@@ -181,6 +209,86 @@
                     btn.disabled = false;
                     btn.classList.remove('animate-pulse');
                 });
+        }
+
+        function toggleCart(productId) {
+            const btn = document.querySelector(`[data-product-id="${productId}"].cart-btn`);
+            const icon = btn.querySelector('svg');
+            const currentInCart = btn.getAttribute('data-in-cart') === 'true';
+
+            // Check if button is disabled (out of stock)
+            if (btn.disabled) {
+                showToast('Produk sedang habis stok', 'error');
+                return;
+            }
+
+            // Disable button temporarily
+            btn.disabled = true;
+            btn.classList.add('animate-pulse');
+
+            fetch(`/cart/${productId}/toggle`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    },
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Update button state
+                        const newInCart = data.in_cart;
+                        btn.setAttribute('data-in-cart', newInCart);
+
+                        // Update icon appearance with smooth transition
+                        if (newInCart) {
+                            // In cart: green cart with scale
+                            icon.classList.add('text-green-600', 'scale-110');
+                            icon.classList.remove('text-gray-400');
+
+                            // Add shake animation
+                            icon.classList.add('animate-shake');
+                            setTimeout(() => {
+                                icon.classList.remove('animate-shake');
+                            }, 600);
+                        } else {
+                            // Not in cart: gray cart
+                            icon.classList.remove('text-green-600', 'scale-110');
+                            icon.classList.add('text-gray-400');
+                        }
+
+                        // Update cart counter in navbar if exists
+                        updateCartCounter(data.cart_count);
+                        showToast(data.message, 'success');
+                    } else {
+                        showToast(data.message || 'Terjadi kesalahan', 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showToast('Terjadi kesalahan jaringan', 'error');
+                })
+                .finally(() => {
+                    btn.disabled = false;
+                    btn.classList.remove('animate-pulse');
+                });
+        }
+
+        function updateCartCounter(count) {
+            const cartCounter = document.getElementById('cart-counter');
+            if (cartCounter) {
+                cartCounter.textContent = count;
+                if (count > 0) {
+                    cartCounter.classList.remove('hidden');
+                    // Add bounce animation to counter
+                    cartCounter.classList.add('animate-bounce');
+                    setTimeout(() => {
+                        cartCounter.classList.remove('animate-bounce');
+                    }, 600);
+                } else {
+                    cartCounter.classList.add('hidden');
+                }
+            }
         }
 
         function showToast(message, type = 'success') {

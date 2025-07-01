@@ -41,19 +41,32 @@
             <div class="flex items-center space-x-4">
 
                 <!-- Icon Keranjang -->
-                <div class="relative">
-                    <button class="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center text-white">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                @auth
+                    <a href="{{ route('cart.index') }}"
+                        class="relative p-2 text-gray-600 hover:text-gray-900 transition-colors">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13l-1.34 2.68A1 1 0 007 17h10a1 1 0 00.93-.63L19 13M16 21a1 1 0 100-2 1 1 0 000 2zm-8 0a1 1 0 100-2 1 1 0 000 2z" />
+                                d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13v6a2 2 0 002 2h6a2 2 0 002-2v-6m-8 0V9a2 2 0 012-2h4a2 2 0 012 2v4">
+                            </path>
                         </svg>
-                    </button>
-                    <span
-                        class="absolute -top-1 -right-1 bg-white text-gray-800 text-xs font-semibold rounded-full w-5 h-5 flex items-center justify-center shadow">
-                        0
-                    </span>
-                </div>
 
+                        <!-- Cart Counter Badge -->
+                        @php
+                            $cartCount = auth()->user()->cartItemsCount();
+                        @endphp
+                        @if ($cartCount > 0)
+                            <span id="cart-counter"
+                                class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-medium">
+                                {{ $cartCount }}
+                            </span>
+                        @else
+                            <span id="cart-counter"
+                                class="hidden absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-medium">
+                                0
+                            </span>
+                        @endif
+                    </a>
+                @endauth
                 <button class="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center text-white">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"

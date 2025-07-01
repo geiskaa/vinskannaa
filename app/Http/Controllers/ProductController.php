@@ -6,17 +6,18 @@ use App\Models\Favorite;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class ProductController extends Controller
 {
     public function index(Request $request)
     {
-        $perPage = 10; // Jumlah produk per halaman
+        $perPage = 10;
         $page = $request->get('page', 1);
         $offset = ($page - 1) * $perPage;
+        $query = Product::latest();
 
-        $products = Product::latest()
-            ->skip($offset)
+        $products = $query->skip($offset)
             ->take($perPage)
             ->get();
 
@@ -24,17 +25,37 @@ class ProductController extends Controller
         $hasMore = ($offset + $perPage) < $totalProducts;
         $currentPage = $page;
 
-        // Jika user login, load status favorites untuk setiap produk
-        if (auth('user')->check()) {
-            $favoriteIds = auth('user')->user()->favorites()->pluck('product_id')->toArray();
-            foreach ($products as $product) {
-                $product->is_favorited = in_array($product->id, $favoriteIds);
+        // Log user info
+        $userId = auth('web')->check() ? auth('web')->id() : 'Guest';
+        Log::info("User ID {$userId} membuka dashboard, halaman {$page}");
+
+        foreach ($products as $product) {
+            if (auth('web')->check()) {
+                $user = auth('web')->user();
+
+                // Check if product is favorited
+                $product->is_favorited = $user->favorites()
+                    ->where('product_id', $product->id)
+                    ->exists();
+
+                // Check if product is in cart
+                $product->in_cart = $user->carts()
+                    ->where('product_id', $product->id)
+                    ->exists();
+            } else {
+                $product->is_favorited = false;
+                $product->in_cart = false;
             }
+
+            // Log the product status AFTER setting the properties
+            Log::info("Produk ID {$product->id}: Favorited = " .
+                var_export($product->is_favorited, true) .
+                ", In Cart = " .
+                var_export($product->in_cart, true));
         }
 
         return view('dashboard', compact('products', 'hasMore', 'currentPage'));
     }
-
 
     public function toggle(Request $request, Product $product)
     {
@@ -66,6 +87,10 @@ class ProductController extends Controller
             $message = 'Produk ditambahkan ke favorites';
         }
 
+        // Log after the toggle action
+        Log::info("Produk: {$product->name} (ID: {$product->id}) | Action: " .
+            ($isFavorited ? 'Added to' : 'Removed from') . " favorites");
+
         return response()->json([
             'success' => true,
             'is_favorited' => $isFavorited,
@@ -73,5 +98,4 @@ class ProductController extends Controller
             'favorites_count' => $product->favoritesCount()
         ]);
     }
-
 }

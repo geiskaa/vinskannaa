@@ -54,6 +54,11 @@ class User extends Authenticatable
         return $this->hasMany(Favorite::class);
     }
 
+    public function carts()
+    {
+        return $this->hasMany(Cart::class);
+    }
+
     /**
      * Relasi ke Products melalui Favorites
      */
@@ -63,10 +68,42 @@ class User extends Authenticatable
     }
 
     /**
+     * Relasi ke Products melalui Cart
+     */
+    public function cartProducts()
+    {
+        return $this->belongsToMany(Product::class, 'carts')->withPivot('quantity', 'price');
+    }
+
+    /**
      * Cek apakah user sudah mem-favorite product tertentu
      */
     public function hasFavorited($productId)
     {
         return $this->favorites()->where('product_id', $productId)->exists();
+    }
+
+    /**
+     * Cek apakah user sudah menambahkan product ke cart
+     */
+    public function hasInCart($productId)
+    {
+        return $this->carts()->where('product_id', $productId)->exists();
+    }
+
+    /**
+     * Hitung total items dalam cart
+     */
+    public function cartItemsCount()
+    {
+        return $this->carts()->sum('quantity');
+    }
+
+    /**
+     * Hitung total harga cart
+     */
+    public function cartTotal()
+    {
+        return $this->carts()->sum(\DB::raw('quantity * price'));
     }
 }

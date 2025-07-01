@@ -41,6 +41,11 @@ class Product extends Model
         return $this->hasMany(Favorite::class);
     }
 
+    public function carts()
+    {
+        return $this->hasMany(Cart::class);
+    }
+
     /**
      * Relasi ke Users melalui Favorites
      */
@@ -50,11 +55,27 @@ class Product extends Model
     }
 
     /**
+     * Relasi ke Users melalui Carts
+     */
+    public function cartedByUsers()
+    {
+        return $this->belongsToMany(User::class, 'carts')->withPivot('quantity', 'price');
+    }
+
+    /**
      * Hitung jumlah favorites
      */
     public function favoritesCount()
     {
         return $this->favorites_count ?? $this->favorites()->count();
+    }
+
+    /**
+     * Hitung jumlah total di cart dari semua user
+     */
+    public function cartQuantity()
+    {
+        return $this->carts()->sum('quantity');
     }
 
     protected static function booted()
