@@ -192,7 +192,7 @@
             <p class="text-lg text-gray-600 mb-8 max-w-2xl mx-auto">
                 Mulai berbelanja produk thrift berkualitas dan dukung gerakan fashion berkelanjutan bersama ThriftHub.
             </p>
-            <a href="/products"
+            <a href="/dashboard"
                 class="inline-flex items-center space-x-2 bg-gray-900 text-white px-8 py-3 rounded-lg hover:bg-gray-800 transition-colors">
                 <span class="text-lg font-medium">Jelajahi Produk</span>
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">

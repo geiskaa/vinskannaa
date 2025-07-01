@@ -12,7 +12,7 @@ class ProductController extends Controller
 {
     public function index(Request $request)
     {
-        $perPage = 10;
+        $perPage = 5;
         $page = $request->get('page', 1);
         $offset = ($page - 1) * $perPage;
         $query = Product::latest();
@@ -52,6 +52,17 @@ class ProductController extends Controller
                 var_export($product->is_favorited, true) .
                 ", In Cart = " .
                 var_export($product->in_cart, true));
+        }
+
+        // If this is an AJAX request, return JSON response
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'products' => $products,
+                'hasMore' => $hasMore,
+                'currentPage' => $currentPage,
+                'html' => view('partials.product-grid', compact('products'))->render()
+            ]);
         }
 
         return view('dashboard', compact('products', 'hasMore', 'currentPage'));

@@ -77,7 +77,7 @@
         </div>
 
         <!-- Menu Navigasi Tambahan -->
-        @if (!request()->is('about'))
+        @if (!request()->is('about') && !request()->is('cart'))
             <div class="border-t py-4">
                 <div class="flex space-x-8">
                     <a href="" class="text-gray-700 hover:text-gray-900 font-medium px-4 py-2 rounded-md">

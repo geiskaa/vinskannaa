@@ -5,144 +5,42 @@
 @section('content')
     <div class="max-w-7xl mx-auto px-4 py-8">
         <!-- Grid Produk -->
-        <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-6 mb-8">
-            @forelse ($products as $product)
-                <div class="bg-white rounded-lg shadow-sm overflow-hidden group hover:shadow-md transition-shadow">
-                    <div class="aspect-square bg-gray-200 relative overflow-hidden">
-                        <!-- Action Buttons Container - DIPERBAIKI -->
-                        @auth
-                            <div class="absolute top-2 right-2 z-10 flex flex-col space-y-2">
-                                <!-- Favorite Button -->
-                                <button onclick="toggleFavorite({{ $product->id }})"
-                                    class="p-2 rounded-full bg-white bg-opacity-80 hover:bg-opacity-100 transition-all duration-200 shadow-sm hover:shadow-md favorite-btn transform hover:scale-110"
-                                    data-product-id="{{ $product->id }}"
-                                    data-is-favorited="{{ $product->is_favorited ? 'true' : 'false' }}">
-                                    <svg class="w-5 h-5 transition-all duration-300 {{ $product->is_favorited ? 'text-red-500 fill-current scale-110' : 'text-gray-400' }}"
-                                        fill="{{ $product->is_favorited ? 'currentColor' : 'none' }}" stroke="currentColor"
-                                        viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z">
-                                        </path>
-                                    </svg>
-                                </button>
-
-                                <!-- Cart Button -->
-                                <button onclick="toggleCart({{ $product->id }})"
-                                    class="p-2 rounded-full bg-white bg-opacity-80 hover:bg-opacity-100 transition-all duration-200 shadow-sm hover:shadow-md cart-btn transform hover:scale-110"
-                                    data-product-id="{{ $product->id }}"
-                                    data-in-cart="{{ $product->in_cart ? 'true' : 'false' }}"
-                                    {{ $product->stock !== null && $product->stock <= 0 ? 'disabled' : '' }}>
-                                    <svg class="w-5 h-5 transition-all duration-300 {{ $product->in_cart ? 'text-green-600 scale-110' : 'text-gray-400' }}"
-                                        fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13v6a2 2 0 002 2h6a2 2 0 002-2v-6m-8 0V9a2 2 0 012-2h4a2 2 0 012 2v4">
-                                        </path>
-                                    </svg>
-                                </button>
-                            </div>
-                        @endauth
-                        @if ($product->image && (Str::startsWith($product->image, 'http') || Storage::disk('public')->exists($product->image)))
-                            {{-- Gambar utama dari database (lokal atau URL) --}}
-                            <img src="{{ Str::startsWith($product->image, 'http') ? $product->image : asset('storage/' . $product->image) }}"
-                                alt="{{ $product->name }}"
-                                class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
-                        @elseif ($product->images && is_array($product->images) && count($product->images) > 0)
-                            @php
-                                $firstImage = $product->images[0];
-                                $isExternal = Str::startsWith($firstImage, 'http');
-                                $imageExists = !$isExternal && Storage::disk('public')->exists($firstImage);
-                            @endphp
-
-                            @if ($isExternal || $imageExists)
-                                <img src="{{ $isExternal ? $firstImage : asset('storage/' . $firstImage) }}"
-                                    alt="{{ $product->name }}"
-                                    class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
-                            @else
-                                {{-- Placeholder jika gambar tidak ditemukan --}}
-                                <div class="w-full h-full flex items-center justify-center bg-gray-300">
-                                    <svg class="w-16 h-16 text-gray-400" fill="none" stroke="currentColor"
-                                        viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z">
-                                        </path>
-                                    </svg>
-                                </div>
-                            @endif
-                        @else
-                            <!-- Default placeholder jika tidak ada gambar -->
-                            <div class="w-full h-full flex items-center justify-center bg-gray-300">
-                                <svg class="w-16 h-16 text-gray-400" fill="none" stroke="currentColor"
-                                    viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z">
-                                    </path>
-                                </svg>
-                            </div>
-                        @endif
-                    </div>
-
-                    <div class="p-4">
-                        <h3 class="text-sm font-medium text-gray-800 mb-1">
-                            {{ Str::title(Str::limit($product->name, 30)) }}<br>
-                            @if ($product->category)
-                                <span class="inline-block  text-amber-800 text-xs font-semibold py-0.5 rounded-full mt-1">
-                                    {{ Str::title($product->category) }}
-                                </span>
-                            @endif
-                        </h3>
-
-                        <p class="text-lg font-bold text-gray-900">
-                            Rp {{ number_format($product->price, 0, ',', '.') }}
-                        </p>
-                        @if ($product->stock !== null)
-                            <p class="text-xs text-gray-500 mt-1">
-                                Stok: {{ $product->stock > 0 ? $product->stock : 'Habis' }}
-                            </p>
-                        @endif
-                        @if ($product->ratings)
-                            <div class="flex items-center mt-1">
-                                <span class="text-yellow-400 text-xs">★</span>
-                                <span class="text-xs text-gray-600 ml-1">{{ $product->ratings }}</span>
-                            </div>
-                        @endif
-                    </div>
-                </div>
-            @empty
-                <!-- Pesan jika tidak ada produk -->
-                <div class="col-span-full text-center py-12">
-                    <div class="flex flex-col items-center">
-                        <svg class="w-16 h-16 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
-                        </svg>
-                        <h3 class="text-lg font-medium text-gray-900 mb-2">Belum ada produk</h3>
-                        <p class="text-gray-500">Produk akan ditampilkan di sini setelah ditambahkan.</p>
-                    </div>
-                </div>
-            @endforelse
+        <div id="products-grid" class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-6 mb-8">
+            @include('partials.product-grid', ['products' => $products])
         </div>
 
-        <!-- Go To Shop Button - hanya tampil jika ada produk -->
-        @if ($products->count() > 0)
-            <div class="flex justify-center">
-                <form action="" method="GET">
-                    <button type="submit"
-                        class="px-6 py-3 bg-gray-800 text-white text-sm rounded-lg hover:bg-gray-700 transition-colors duration-200 shadow-sm hover:shadow-md">
-                        Tampilkan Lebih Banyak
-                    </button>
-                </form>
+        <!-- Loading Spinner -->
+        <div id="loading-spinner" class="hidden flex justify-center items-center py-8">
+            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-800"></div>
+            <span class="ml-2 text-gray-600">Memuat produk...</span>
+        </div>
+
+        <!-- Load More Button -->
+        @if ($hasMore)
+            <div id="load-more-container" class="flex justify-center">
+                <button id="load-more-btn" type="button"
+                    class="px-6 py-3 bg-gray-800 text-white text-sm rounded-lg hover:bg-gray-700 transition-colors duration-200 shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed">
+                    Tampilkan Lebih Banyak
+                </button>
             </div>
         @endif
 
+        <!-- No More Products Message -->
+        <div id="no-more-products" class="hidden text-center py-4">
+            <p class="text-gray-500 text-sm">Tidak ada produk lagi untuk ditampilkan</p>
+        </div>
     </div>
 
     <!-- Toast Container -->
     <div id="toast-container" class="fixed top-4 right-4 z-50 space-y-2"></div>
 
     <script>
+        let currentPage = {{ $currentPage }};
+        let hasMore = {{ $hasMore ? 'true' : 'false' }};
+        let isLoading = false;
+
         document.addEventListener('DOMContentLoaded', function() {
-
-
+            // Debug existing products
             document.querySelectorAll('.favorite-btn').forEach(btn => {
                 console.log('Favorite State:', btn.dataset.productId, btn.dataset.isFavorited);
             });
@@ -151,13 +49,93 @@
                 console.log('Cart State:', btn.dataset.productId, btn.dataset.inCart);
             });
 
+            // Load More Button Event
+            const loadMoreBtn = document.getElementById('load-more-btn');
+            if (loadMoreBtn) {
+                loadMoreBtn.addEventListener('click', loadMoreProducts);
+            }
         });
+
+        function loadMoreProducts() {
+            if (isLoading || !hasMore) return;
+
+            isLoading = true;
+            const loadMoreBtn = document.getElementById('load-more-btn');
+            const loadingSpinner = document.getElementById('loading-spinner');
+            const productsGrid = document.getElementById('products-grid');
+
+            // Show loading state
+            loadMoreBtn.disabled = true;
+            loadMoreBtn.innerHTML = `
+                <div class="flex items-center">
+                    <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    Memuat...
+                </div>
+            `;
+            loadingSpinner.classList.remove('hidden');
+
+            fetch(`/dashboard?page=${currentPage + 1}`, {
+                    method: 'GET',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json',
+                    },
+                    credentials: 'same-origin',
+                }).then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    console.log('Loading more products for page:', response);
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success && data.html) {
+                        // Create temporary container to parse HTML
+                        const tempDiv = document.createElement('div');
+                        tempDiv.innerHTML = data.html;
+
+                        // Append new products to grid
+                        const newProducts = tempDiv.children;
+                        while (newProducts.length > 0) {
+                            productsGrid.appendChild(newProducts[0]);
+                        }
+
+                        // Update pagination variables
+                        currentPage = data.currentPage;
+                        hasMore = data.hasMore;
+
+                        // Update UI based on hasMore
+                        if (!hasMore) {
+                            document.getElementById('load-more-container').classList.add('hidden');
+                            document.getElementById('no-more-products').classList.remove('hidden');
+                        }
+
+                        showToast(`${data.products.length} produk baru dimuat`, 'success');
+                    } else {
+                        throw new Error('Invalid response data');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading more products:', error);
+                    showToast('Gagal memuat produk. Silakan coba lagi.', 'error');
+                })
+                .finally(() => {
+                    // Reset loading state
+                    isLoading = false;
+                    loadingSpinner.classList.add('hidden');
+
+                    if (hasMore) {
+                        loadMoreBtn.disabled = false;
+                        loadMoreBtn.textContent = 'Tampilkan Lebih Banyak';
+                    }
+                });
+        }
 
         function toggleFavorite(productId) {
             const btn = document.querySelector(`[data-product-id="${productId}"].favorite-btn`);
             const icon = btn.querySelector('svg');
             const currentIsFavorited = btn.getAttribute('data-is-favorited') === 'true';
-            console.log(`Product ID: ${productId}, is_favorited: ${currentIsFavorited}`); // ✅ Console log
+            console.log(`Product ID: ${productId}, is_favorited: ${currentIsFavorited}`);
 
             // Disable button temporarily
             btn.disabled = true;
@@ -380,6 +358,16 @@
 
         .animate-bounce {
             animation: bounce 0.6s ease-in-out;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .animate-spin {
+            animation: spin 1s linear infinite;
         }
     </style>
 @endsection
