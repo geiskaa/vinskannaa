@@ -9,6 +9,22 @@
             @forelse ($products as $product)
                 <div class="bg-white rounded-lg shadow-sm overflow-hidden group hover:shadow-md transition-shadow">
                     <div class="aspect-square bg-gray-200 relative overflow-hidden">
+                        <!-- Favorite Button -->
+                        @auth
+                            <button onclick="toggleFavorite({{ $product->id }})"
+                                class="absolute top-2 right-2 z-10 p-2 rounded-full bg-white bg-opacity-80 hover:bg-opacity-100 transition-all duration-200 shadow-sm hover:shadow-md favorite-btn transform hover:scale-110"
+                                data-product-id="{{ $product->id }}"
+                                data-is-favorited="{{ isset($product->is_favorited) && $product->is_favorited ? 'true' : 'false' }}">
+                                <svg class="w-5 h-5 transition-all duration-300 {{ isset($product->is_favorited) && $product->is_favorited ? 'text-red-500 fill-current scale-110' : 'text-gray-400' }}"
+                                    fill="{{ isset($product->is_favorited) && $product->is_favorited ? 'currentColor' : 'none' }}"
+                                    stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z">
+                                    </path>
+                                </svg>
+                            </button>
+                        @endauth
+
                         @if ($product->image && (Str::startsWith($product->image, 'http') || Storage::disk('public')->exists($product->image)))
                             {{-- Gambar utama dari database (lokal atau URL) --}}
                             <img src="{{ Str::startsWith($product->image, 'http') ? $product->image : asset('storage/' . $product->image) }}"
@@ -103,4 +119,159 @@
         @endif
 
     </div>
+
+    <!-- Toast Container -->
+    <div id="toast-container" class="fixed top-4 right-4 z-50 space-y-2"></div>
+
+    <script>
+        function toggleFavorite(productId) {
+            const btn = document.querySelector(`[data-product-id="${productId}"]`);
+            const icon = btn.querySelector('svg');
+            const currentIsFavorited = btn.getAttribute('data-is-favorited') === 'true';
+
+            // Disable button temporarily
+            btn.disabled = true;
+
+            // Add loading animation
+            btn.classList.add('animate-pulse');
+
+            fetch(`/favorites/${productId}/toggle`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    },
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Update button state
+                        const newIsFavorited = data.is_favorited;
+                        btn.setAttribute('data-is-favorited', newIsFavorited);
+
+                        // Update icon appearance with smooth transition
+                        if (newIsFavorited) {
+                            // Favorited: red heart with fill
+                            icon.classList.add('text-red-500', 'fill-current', 'scale-110');
+                            icon.classList.remove('text-gray-400');
+                            icon.setAttribute('fill', 'currentColor');
+
+                            // Add bounce animation
+                            icon.classList.add('animate-bounce');
+                            setTimeout(() => {
+                                icon.classList.remove('animate-bounce');
+                            }, 600);
+                        } else {
+                            // Not favorited: gray heart without fill
+                            icon.classList.remove('text-red-500', 'fill-current', 'scale-110');
+                            icon.classList.add('text-gray-400');
+                            icon.setAttribute('fill', 'none');
+                        }
+
+                        showToast(data.message, 'success');
+                    } else {
+                        showToast(data.message || 'Terjadi kesalahan', 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showToast('Terjadi kesalahan jaringan', 'error');
+                })
+                .finally(() => {
+                    btn.disabled = false;
+                    btn.classList.remove('animate-pulse');
+                });
+        }
+
+        function showToast(message, type = 'success') {
+            const toastContainer = document.getElementById('toast-container');
+
+            // Create toast element
+            const toast = document.createElement('div');
+            toast.className = `transform transition-all duration-300 ease-in-out translate-x-full opacity-0`;
+
+            // Toast content based on type
+            const bgColor = type === 'success' ? 'bg-green-500' : 'bg-red-500';
+            const icon = type === 'success' ?
+                `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>` :
+                `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>`;
+
+            toast.innerHTML = `
+                <div class="${bgColor} text-white px-4 py-3 rounded-lg shadow-lg flex items-center space-x-3 min-w-64 max-w-sm">
+                    <div class="flex-shrink-0">
+                        ${icon}
+                    </div>
+                    <div class="flex-1">
+                        <p class="text-sm font-medium">${message}</p>
+                    </div>
+                    <button onclick="removeToast(this)" class="flex-shrink-0 ml-2 text-white hover:text-gray-200 transition-colors">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+            `;
+
+            toastContainer.appendChild(toast);
+
+            // Trigger animation after a brief delay
+            setTimeout(() => {
+                toast.classList.remove('translate-x-full', 'opacity-0');
+                toast.classList.add('translate-x-0', 'opacity-100');
+            }, 100);
+
+            // Auto remove after 4 seconds
+            setTimeout(() => {
+                removeToast(toast);
+            }, 4000);
+        }
+
+        function removeToast(element) {
+            const toast = element.closest('.transform');
+            if (toast) {
+                toast.classList.remove('translate-x-0', 'opacity-100');
+                toast.classList.add('translate-x-full', 'opacity-0');
+
+                setTimeout(() => {
+                    if (toast.parentNode) {
+                        toast.parentNode.removeChild(toast);
+                    }
+                }, 300);
+            }
+        }
+    </script>
+
+    <style>
+        @keyframes bounce {
+
+            0%,
+            20%,
+            53%,
+            80%,
+            100% {
+                transform: translate3d(0, 0, 0);
+            }
+
+            40%,
+            43% {
+                transform: translate3d(0, -8px, 0);
+            }
+
+            70% {
+                transform: translate3d(0, -4px, 0);
+            }
+
+            90% {
+                transform: translate3d(0, -2px, 0);
+            }
+        }
+
+        .animate-bounce {
+            animation: bounce 0.6s ease-in-out;
+        }
+    </style>
 @endsection

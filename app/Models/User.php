@@ -48,4 +48,25 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    public function favorites()
+    {
+        return $this->hasMany(Favorite::class);
+    }
+
+    /**
+     * Relasi ke Products melalui Favorites
+     */
+    public function favoriteProducts()
+    {
+        return $this->belongsToMany(Product::class, 'favorites');
+    }
+
+    /**
+     * Cek apakah user sudah mem-favorite product tertentu
+     */
+    public function hasFavorited($productId)
+    {
+        return $this->favorites()->where('product_id', $productId)->exists();
+    }
 }

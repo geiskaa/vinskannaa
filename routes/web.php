@@ -24,3 +24,5 @@ Route::get('/dashboard', [ProductController::class, 'index'])->name('dashboard')
 Route::get('/about', function () {
     return view('about');
 })->name('about')->middleware('auth');
+
+Route::post('/favorites/{product}/toggle', [ProductController::class, 'toggle'])->name('favorites.toggle');

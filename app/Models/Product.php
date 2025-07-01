@@ -21,22 +21,46 @@ class Product extends Model
         'stock',
         'ratings',
         'images',
+        'seller_id',
     ];
 
     protected $casts = [
         'images' => 'array',
+        'price' => 'decimal:2',
+        'stock' => 'integer',
+        'ratings' => 'float',
     ];
-
 
     public function seller()
     {
         return $this->belongsTo(Seller::class);
     }
 
+    public function favorites()
+    {
+        return $this->hasMany(Favorite::class);
+    }
+
+    /**
+     * Relasi ke Users melalui Favorites
+     */
+    public function favoritedByUsers()
+    {
+        return $this->belongsToMany(User::class, 'favorites');
+    }
+
+    /**
+     * Hitung jumlah favorites
+     */
+    public function favoritesCount()
+    {
+        return $this->favorites_count ?? $this->favorites()->count();
+    }
+
     protected static function booted()
     {
         static::creating(function ($product) {
-            if (empty($product->slug)) {
+            if (empty($product->slug) && !empty($product->name)) {
                 $product->slug = Str::slug($product->name);
             }
         });
