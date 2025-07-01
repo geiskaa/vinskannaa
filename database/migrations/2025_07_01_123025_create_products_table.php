@@ -12,6 +12,7 @@ return new class extends Migration {
     {
         Schema::create('products', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('seller_id')->constrained()->onDelete('cascade');
             $table->string('name');
             $table->string('slug')->unique();
             $table->enum('section', ['men', 'women', 'kids']);
@@ -28,7 +29,7 @@ return new class extends Migration {
             ]);
             $table->decimal('price', 10, 2);
             $table->text('description')->nullable();
-            $table->string('image')->nullable();
+            $table->json('images')->nullable();
             $table->integer('stock')->default(0);
             $table->timestamps();
         });

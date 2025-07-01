@@ -19,7 +19,13 @@ class Product extends Model
         'description',
         'image',
         'stock',
+        'images',
     ];
+
+    public function seller()
+    {
+        return $this->belongsTo(Seller::class);
+    }
 
     protected static function booted()
     {
