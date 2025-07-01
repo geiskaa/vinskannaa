@@ -6,7 +6,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Password;
+use Illuminate\Validation\Rules\Password;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 
@@ -153,9 +153,9 @@ class AuthController extends Controller
                 'required',
                 'confirmed',
                 Password::min(8)
-                    ->mixedCase()
-                    ->numbers()
-                    ->symbols()
+                // ->mixedCase()
+                // ->numbers()
+                // ->symbols()
             ],
             'terms' => ['required', 'accepted'],
         ], [
@@ -176,6 +176,7 @@ class AuthController extends Controller
             'name' => $data['first_name'] . ' ' . $data['last_name'],
             'email' => $data['email'],
             'password' => Hash::make($data['password']),
+            'role' => 'user',
         ]);
     }
 }
