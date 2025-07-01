@@ -15,12 +15,7 @@
                     <a href="{{ route('dashboard') }}"
                         class="text-xl font-bold tracking-wider px-3 py-1 rounded-md transition-colors
                        {{ request()->routeIs('dashboard') ? 'bg-gray-200 text-black' : 'text-gray-700 hover:bg-gray-100' }}">
-                        Beranda
-                    </a>
-                    <a href="{{ route('products') }}"
-                        class="text-xl font-bold tracking-wider px-3 py-1 rounded-md transition-colors
-                       {{ request()->routeIs('products') ? 'bg-gray-200 text-black' : 'text-gray-700 hover:bg-gray-100' }}">
-                        Produk
+                        Products
                     </a>
                     <a href="{{ route('about') }}"
                         class="text-xl font-bold tracking-wider px-3 py-1 rounded-md transition-colors

@@ -19,8 +19,14 @@ class Product extends Model
         'description',
         'image',
         'stock',
+        'ratings',
         'images',
     ];
+
+    protected $casts = [
+        'images' => 'array',
+    ];
+
 
     public function seller()
     {

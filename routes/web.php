@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\ProductController;
 use App\Http\Controllers\SocialLoginController;
 use Illuminate\Support\Facades\Route;
 
@@ -19,12 +20,7 @@ Route::get('/auth/google/callback', [SocialLoginController::class, 'handleGoogle
 Route::get('/auth/facebook', [SocialLoginController::class, 'redirectToFacebook'])->name('auth.facebook');
 Route::get('/auth/facebook/callback', [SocialLoginController::class, 'handleFacebookCallback']);
 
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->name('dashboard')->middleware('auth');
+Route::get('/dashboard', [ProductController::class, 'index'])->name('dashboard')->middleware('auth');
 Route::get('/about', function () {
     return view('about');
 })->name('about')->middleware('auth');
-Route::get('/products', function () {
-    return view('products');
-})->name('products')->middleware('auth');

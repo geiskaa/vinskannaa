@@ -30,6 +30,7 @@ return new class extends Migration {
             $table->decimal('price', 10, 2);
             $table->text('description')->nullable();
             $table->json('images')->nullable();
+            $table->decimal('ratings')->default(0);
             $table->integer('stock')->default(0);
             $table->timestamps();
         });
