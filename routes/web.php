@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\SocialLoginController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -9,25 +10,15 @@ Route::get('/', function () {
 
 Route::get('/register', [AuthController::class, 'showRegistrationForm'])->name('register');
 Route::post('/register', [AuthController::class, 'register']);
+Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 Route::get('/login', function () {
     return view('auth.login');
 })->name('login');
 
-// Social Authentication Routes (optional)
-Route::get('/auth/google', function () {
-    // Implement Google OAuth logic
-    return redirect()->back()->with('info', 'Google authentication not implemented yet.');
-})->name('auth.google');
-
-Route::get('/auth/apple', function () {
-    // Implement Apple OAuth logic
-    return redirect()->back()->with('info', 'Apple authentication not implemented yet.');
-})->name('auth.apple');
-
-Route::get('/auth/facebook', function () {
-    // Implement Facebook OAuth logic
-    return redirect()->back()->with('info', 'Facebook authentication not implemented yet.');
-})->name('auth.facebook');
+Route::get('/auth/google', [SocialLoginController::class, 'redirectToGoogle'])->name('auth.google');
+Route::get('/auth/google/callback', [SocialLoginController::class, 'handleGoogleCallback']);
+Route::get('/auth/facebook', [SocialLoginController::class, 'redirectToFacebook'])->name('auth.facebook');
+Route::get('/auth/facebook/callback', [SocialLoginController::class, 'handleFacebookCallback']);
 
 Route::get('/dashboard', function () {
     return view('dashboard');

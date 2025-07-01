@@ -1,6 +1,12 @@
 {{-- Social Login Component --}}
 <div>
-    <p class="text-sm font-medium text-gray-700 mb-4">Sign up with</p>
+    <p class="text-sm font-medium text-gray-700 mb-4">
+        @if (request()->is('register'))
+            Sign up with
+        @else
+            Sign in with
+        @endif
+    </p>
 
     <div class="grid grid-cols-3 gap-3">
         {{-- Google --}}
