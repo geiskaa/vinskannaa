@@ -46,3 +46,5 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/cart', [CartController::class, 'clear'])->name('cart.clear');
 
 });
+
+Route::get('/edit/profle', [AuthController::class, 'showEditProfile'])->name('profile.edit');
