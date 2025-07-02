@@ -26,17 +26,19 @@
                 <div class="flex items-center space-x-8">
                     <!-- Brand -->
                     <div class="flex-shrink-0">
-                        <h1
-                            class="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
-                            ThriftHub
-                        </h1>
+                        <a href="{{ route('dashboard') }}">
+                            <h1
+                                class="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent cursor-pointer">
+                                ThriftHub
+                            </h1>
+                        </a>
                     </div>
 
                     <!-- Navigation Links -->
                     <div class="hidden lg:flex items-center space-x-1">
                         <a href="{{ route('dashboard') }}"
                             class="px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 ease-in-out
-                                  {{ request()->routeIs('dashboard')
+                                  {{ request()->routeIs('dashboard') && !request()->has('section')
                                       ? 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-md transform scale-105'
                                       : 'text-gray-700 hover:text-indigo-600 hover:bg-indigo-50 hover:scale-105' }}">
                             <div class="flex items-center space-x-2">
@@ -193,6 +195,7 @@
             </div>
         </div>
 
+        <!-- Mobile Menu -->
         <div x-show="mobileMenuOpen" x-transition:enter="transition ease-out duration-200"
             x-transition:enter-start="opacity-0 transform -translate-y-4"
             x-transition:enter-end="opacity-100 transform translate-y-0"
@@ -203,7 +206,7 @@
             <div class="px-4 py-4 space-y-2">
                 <a href="{{ route('dashboard') }}"
                     class="block px-4 py-3 text-sm font-medium rounded-lg transition-all duration-200
-                          {{ request()->routeIs('dashboard')
+                          {{ request()->routeIs('dashboard') && !request()->has('section')
                               ? 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-md'
                               : 'text-gray-700 hover:text-indigo-600 hover:bg-indigo-50' }}">
                     <div class="flex items-center space-x-3">
@@ -229,14 +232,82 @@
                         <span>Tentang</span>
                     </div>
                 </a>
+
+                <!-- Section Filter Mobile -->
+                <div class="pt-2 border-t border-gray-100">
+                    <p class="px-4 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">Filter by Section
+                    </p>
+                    <a href="{{ route('dashboard', ['section' => 'men']) }}"
+                        class="block px-4 py-3 text-sm font-medium rounded-lg transition-all duration-200
+                              {{ request()->get('section') === 'men'
+                                  ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-md'
+                                  : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50' }}">
+                        <div class="flex items-center space-x-3">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                            </svg>
+                            <span>MEN</span>
+                        </div>
+                    </a>
+
+                    <a href="{{ route('dashboard', ['section' => 'women']) }}"
+                        class="block px-4 py-3 text-sm font-medium rounded-lg transition-all duration-200
+                              {{ request()->get('section') === 'women'
+                                  ? 'bg-gradient-to-r from-pink-500 to-pink-600 text-white shadow-md'
+                                  : 'text-gray-700 hover:text-pink-600 hover:bg-pink-50' }}">
+                        <div class="flex items-center space-x-3">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                            </svg>
+                            <span>WOMEN</span>
+                        </div>
+                    </a>
+
+                    <a href="{{ route('dashboard', ['section' => 'kids']) }}"
+                        class="block px-4 py-3 text-sm font-medium rounded-lg transition-all duration-200
+                              {{ request()->get('section') === 'kids'
+                                  ? 'bg-gradient-to-r from-green-500 to-green-600 text-white shadow-md'
+                                  : 'text-gray-700 hover:text-green-600 hover:bg-green-50' }}">
+                        <div class="flex items-center space-x-3">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1m4 0h1m-6 4h.01M19 10a9 9 0 11-18 0 9 9 0 0118 0z">
+                                </path>
+                            </svg>
+                            <span>KIDS</span>
+                        </div>
+                    </a>
+                </div>
             </div>
         </div>
 
-        @if (request()->is('dashboard'))
+        <!-- Section Filter - Only show on dashboard -->
+        @if (request()->routeIs('dashboard'))
             <div class="border-t border-gray-100 py-4">
-                <div class="flex space-x-8">
-                    <a href="#"
-                        class="group flex items-center space-x-2 px-4 py-2 text-sm font-medium text-gray-700 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all duration-200">
+                <div class="flex space-x-2 overflow-x-auto scrollbar-hide">
+                    <!-- All Products -->
+                    <a href="{{ route('dashboard') }}"
+                        class="group flex items-center space-x-2 px-6 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 whitespace-nowrap
+                              {{ !request()->has('section')
+                                  ? 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-md'
+                                  : 'text-gray-700 hover:text-indigo-600 hover:bg-indigo-50 border border-gray-200' }}">
+                        <svg class="w-4 h-4 group-hover:scale-110 transition-transform" fill="none"
+                            stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10">
+                            </path>
+                        </svg>
+                        <span>ALL</span>
+                    </a>
+
+                    <!-- Men Section -->
+                    <a href="{{ route('dashboard', ['section' => 'men']) }}"
+                        class="group flex items-center space-x-2 px-6 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 whitespace-nowrap
+                              {{ request()->get('section') === 'men'
+                                  ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-md'
+                                  : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50 border border-gray-200' }}">
                         <svg class="w-4 h-4 group-hover:scale-110 transition-transform" fill="none"
                             stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -244,8 +315,13 @@
                         </svg>
                         <span>MEN</span>
                     </a>
-                    <a href="#"
-                        class="group flex items-center space-x-2 px-4 py-2 text-sm font-medium text-gray-700 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all duration-200">
+
+                    <!-- Women Section -->
+                    <a href="{{ route('dashboard', ['section' => 'women']) }}"
+                        class="group flex items-center space-x-2 px-6 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 whitespace-nowrap
+                              {{ request()->get('section') === 'women'
+                                  ? 'bg-gradient-to-r from-pink-500 to-pink-600 text-white shadow-md'
+                                  : 'text-gray-700 hover:text-pink-600 hover:bg-pink-50 border border-gray-200' }}">
                         <svg class="w-4 h-4 group-hover:scale-110 transition-transform" fill="none"
                             stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -253,8 +329,13 @@
                         </svg>
                         <span>WOMEN</span>
                     </a>
-                    <a href="#"
-                        class="group flex items-center space-x-2 px-4 py-2 text-sm font-medium text-gray-700 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all duration-200">
+
+                    <!-- Kids Section -->
+                    <a href="{{ route('dashboard', ['section' => 'kids']) }}"
+                        class="group flex items-center space-x-2 px-6 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 whitespace-nowrap
+                              {{ request()->get('section') === 'kids'
+                                  ? 'bg-gradient-to-r from-green-500 to-green-600 text-white shadow-md'
+                                  : 'text-gray-700 hover:text-green-600 hover:bg-green-50 border border-gray-200' }}">
                         <svg class="w-4 h-4 group-hover:scale-110 transition-transform" fill="none"
                             stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -269,6 +350,7 @@
     </div>
 </nav>
 
+<!-- Mobile Search Bar (unchanged) -->
 <div class="md:hidden bg-white border-b border-gray-100 px-4 py-3">
     <div class="relative">
         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -285,6 +367,15 @@
 <style>
     [x-cloak] {
         display: none !important;
+    }
+
+    .scrollbar-hide {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+
+    .scrollbar-hide::-webkit-scrollbar {
+        display: none;
     }
 </style>
 

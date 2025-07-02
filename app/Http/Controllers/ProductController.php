@@ -15,19 +15,31 @@ class ProductController extends Controller
         $perPage = 5;
         $page = $request->get('page', 1);
         $offset = ($page - 1) * $perPage;
-        $query = Product::latest();
 
-        $products = $query->skip($offset)
+        // Mulai query produk
+        $query = Product::query();
+
+        // Filter berdasarkan section jika disediakan dan bukan 'all'
+        $section = $request->get('section');
+        if ($section && $section !== 'all' && in_array($section, ['men', 'women', 'kids'])) {
+            $query->where('section', $section);
+        }
+
+        // Hitung total produk setelah filter
+        $totalProducts = $query->count();
+
+        // Ambil produk untuk halaman saat ini
+        $products = $query->latest()
+            ->skip($offset)
             ->take($perPage)
             ->get();
 
-        $totalProducts = Product::count();
         $hasMore = ($offset + $perPage) < $totalProducts;
         $currentPage = $page;
 
         // Log user info
         $userId = auth('web')->check() ? auth('web')->id() : 'Guest';
-        Log::info("User ID {$userId} membuka dashboard, halaman {$page}");
+        Log::info("User ID {$userId} membuka dashboard, halaman {$page}, section: {$section}");
 
         foreach ($products as $product) {
             if (auth('web')->check()) {
@@ -54,7 +66,7 @@ class ProductController extends Controller
                 var_export($product->in_cart, true));
         }
 
-        // If this is an AJAX request, return JSON response
+        // Jika request AJAX, kembalikan partial view + JSON
         if ($request->ajax()) {
             return response()->json([
                 'success' => true,

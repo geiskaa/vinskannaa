@@ -64,47 +64,48 @@
             const loadingSpinner = document.getElementById('loading-spinner');
             const productsGrid = document.getElementById('products-grid');
 
+            // Ambil nilai section dari URL (misal ?section=men)
+            const urlParams = new URLSearchParams(window.location.search);
+            const section = urlParams.get('section') || 'all';
+
             // Show loading state
             loadMoreBtn.disabled = true;
             loadMoreBtn.innerHTML = `
-                <div class="flex items-center">
-                    <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                    Memuat...
-                </div>
-            `;
+        <div class="flex items-center">
+            <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+            Memuat...
+        </div>
+    `;
             loadingSpinner.classList.remove('hidden');
 
-            fetch(`/dashboard?page=${currentPage + 1}`, {
+            // Fetch dengan parameter section dan halaman
+            fetch(`/dashboard?page=${currentPage + 1}&section=${section}`, {
                     method: 'GET',
                     headers: {
                         'X-Requested-With': 'XMLHttpRequest',
                         'Accept': 'application/json',
                     },
                     credentials: 'same-origin',
-                }).then(response => {
+                })
+                .then(response => {
                     if (!response.ok) {
                         throw new Error('Network response was not ok');
                     }
-                    console.log('Loading more products for page:', response);
                     return response.json();
                 })
                 .then(data => {
                     if (data.success && data.html) {
-                        // Create temporary container to parse HTML
                         const tempDiv = document.createElement('div');
                         tempDiv.innerHTML = data.html;
 
-                        // Append new products to grid
                         const newProducts = tempDiv.children;
                         while (newProducts.length > 0) {
                             productsGrid.appendChild(newProducts[0]);
                         }
 
-                        // Update pagination variables
                         currentPage = data.currentPage;
                         hasMore = data.hasMore;
 
-                        // Update UI based on hasMore
                         if (!hasMore) {
                             document.getElementById('load-more-container').classList.add('hidden');
                             document.getElementById('no-more-products').classList.remove('hidden');
@@ -120,7 +121,6 @@
                     showToast('Gagal memuat produk. Silakan coba lagi.', 'error');
                 })
                 .finally(() => {
-                    // Reset loading state
                     isLoading = false;
                     loadingSpinner.classList.add('hidden');
 
