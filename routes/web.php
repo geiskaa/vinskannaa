@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CartController;
+use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\SocialLoginController;
 use Illuminate\Support\Facades\Route;
@@ -48,3 +49,6 @@ Route::middleware(['auth'])->group(function () {
 });
 
 Route::get('/edit/profle', [AuthController::class, 'showEditProfile'])->name('profile.edit');
+
+Route::get('/checkout', [OrderController::class, 'checkout'])->name('checkout');
+Route::post('/checkout/token', [OrderController::class, 'getSnapToken']);

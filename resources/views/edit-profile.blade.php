@@ -61,6 +61,15 @@
                                 </svg>
                                 Informasi Pribadi
                             </button>
+                            <button @click="activeTab = 'Riwayat'"
+                                :class="{ 'bg-indigo-50 text-indigo-600 border-indigo-200': activeTab === 'Riwayat' }"
+                                class="w-full flex items-center px-4 py-3 text-left text-sm font-medium text-gray-700 border border-transparent rounded-lg hover:bg-gray-50 transition-colors">
+                                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                Riwayat Pesanan
+                            </button>
 
                         </nav>
                     </div>

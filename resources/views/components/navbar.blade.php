@@ -151,7 +151,7 @@
                             </div>
                         </div>
                         <div class="py-2">
-                            <a href="{{ route('profile.edit') }}"
+                            <a href=""
                                 class="flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 transition-colors group">
                                 <svg class="w-5 h-5 mr-3 text-gray-400 group-hover:text-indigo-500" fill="none"
                                     stroke="currentColor" viewBox="0 0 24 24">

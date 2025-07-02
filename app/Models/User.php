@@ -99,11 +99,4 @@ class User extends Authenticatable
         return $this->carts()->sum('quantity');
     }
 
-    /**
-     * Hitung total harga cart
-     */
-    public function cartTotal()
-    {
-        return $this->carts()->sum(\DB::raw('quantity * price'));
-    }
 }

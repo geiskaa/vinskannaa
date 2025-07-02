@@ -46,20 +46,24 @@ class Product extends Model
         return $this->hasMany(Cart::class);
     }
 
-    /**
-     * Relasi ke Users melalui Favorites
-     */
-    public function favoritedByUsers()
+    public function ratings()
     {
-        return $this->belongsToMany(User::class, 'favorites');
+        return $this->hasMany(ProductRating::class);
+    }
+
+    public function orderItems()
+    {
+        return $this->hasMany(OrderItem::class);
     }
 
     /**
-     * Relasi ke Users melalui Carts
+     * Relasi ke Orders melalui OrderItems
      */
-    public function cartedByUsers()
+    public function orders()
     {
-        return $this->belongsToMany(User::class, 'carts')->withPivot('quantity', 'price');
+        return $this->belongsToMany(Order::class, 'order_items')
+            ->withPivot('quantity', 'price')
+            ->withTimestamps();
     }
 
     /**
@@ -76,6 +80,14 @@ class Product extends Model
     public function cartQuantity()
     {
         return $this->carts()->sum('quantity');
+    }
+
+    /**
+     * Hitung rata-rata rating
+     */
+    public function averageRating()
+    {
+        return $this->ratings()->avg('rating');
     }
 
     protected static function booted()
