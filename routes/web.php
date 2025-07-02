@@ -52,3 +52,4 @@ Route::get('/edit/profle', [AuthController::class, 'showEditProfile'])->name('pr
 
 Route::get('/checkout', [OrderController::class, 'checkout'])->name('checkout');
 Route::post('/checkout/token', [OrderController::class, 'getSnapToken']);
+Route::get('/search', [ProductController::class, 'search'])->name('search');

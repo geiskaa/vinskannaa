@@ -21,12 +21,24 @@ class ProductController extends Controller
 
         // Filter berdasarkan section jika disediakan dan bukan 'all'
         $section = $request->get('section');
+        $search = $request->get('search', '');
+
         if ($section && $section !== 'all' && in_array($section, ['men', 'women', 'kids'])) {
             $query->where('section', $section);
         }
 
+        // Apply search filter
+        if (!empty($search)) {
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'LIKE', '%' . $search . '%')
+                    ->orWhere('category', 'LIKE', '%' . $search . '%')
+                    ->orWhere('description', 'LIKE', '%' . $search . '%');
+            });
+        }
+
         // Hitung total produk setelah filter
         $totalProducts = $query->count();
+        Log::info("Total produk ditemukan setelah filter: {$totalProducts}, Search: '{$search}', Section: '{$section}', Page: {$page}");
 
         // Ambil produk untuk halaman saat ini
         $products = $query->latest()
@@ -39,8 +51,9 @@ class ProductController extends Controller
 
         // Log user info
         $userId = auth('web')->check() ? auth('web')->id() : 'Guest';
-        Log::info("User ID {$userId} membuka dashboard, halaman {$page}, section: {$section}");
+        Log::info("User ID {$userId} membuka dashboard, halaman {$page}, section: {$section}, total: {$totalProducts}, hasMore: " . ($hasMore ? 'true' : 'false'));
 
+        // Set user-specific properties
         foreach ($products as $product) {
             if (auth('web')->check()) {
                 $user = auth('web')->user();
@@ -73,6 +86,10 @@ class ProductController extends Controller
                 'products' => $products,
                 'hasMore' => $hasMore,
                 'currentPage' => $currentPage,
+                'search' => $search,
+                'section' => $section,
+                'total' => $totalProducts,
+                'showing' => $products->count(),
                 'html' => view('partials.product-grid', compact('products'))->render()
             ]);
         }
@@ -119,6 +136,75 @@ class ProductController extends Controller
             'is_favorited' => $isFavorited,
             'message' => $message,
             'favorites_count' => $product->favoritesCount()
+        ]);
+    }
+
+    public function search(Request $request)
+    {
+        $search = $request->get('q', '');
+        $section = $request->get('section', 'all');
+        $perPage = $request->get('per_page', 15);
+
+        if (empty($search)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Search query is required',
+                'data' => []
+            ]);
+        }
+
+        $query = Product::query();
+
+        // Search in multiple fields
+        $query->where(function ($q) use ($search) {
+            $q->where('name', 'LIKE', '%' . $search . '%')
+                ->orWhere('category', 'LIKE', '%' . $search . '%')
+                ->orWhere('description', 'LIKE', '%' . $search . '%')
+                ->orWhere('brand', 'LIKE', '%' . $search . '%'); // if you have brand field
+        });
+
+        // Apply section filter
+        if ($section !== 'all') {
+            $query->where('section', $section);
+        }
+
+        // Order by relevance (name matches first, then category, then description)
+        $query->orderByRaw("
+            CASE 
+                WHEN name LIKE ? THEN 1
+                WHEN category LIKE ? THEN 2
+                WHEN description LIKE ? THEN 3
+                ELSE 4
+            END,
+            created_at DESC
+        ", ["%{$search}%", "%{$search}%", "%{$search}%"]);
+
+        $products = $query->paginate($perPage);
+
+        // Add user-specific data if authenticated
+        if (Auth::check()) {
+            $user = Auth::user();
+            $favoriteProductIds = $user->favorites()->pluck('product_id')->toArray();
+            $cartProductIds = $user->cartItems()->pluck('product_id')->toArray();
+
+            foreach ($products as $product) {
+                $product->is_favorited = in_array($product->id, $favoriteProductIds);
+                $product->in_cart = in_array($product->id, $cartProductIds);
+            }
+        }
+
+        return response()->json([
+            'success' => true,
+            'data' => $products->items(),
+            'pagination' => [
+                'current_page' => $products->currentPage(),
+                'last_page' => $products->lastPage(),
+                'per_page' => $products->perPage(),
+                'total' => $products->total(),
+                'has_more' => $products->hasMorePages(),
+            ],
+            'search' => $search,
+            'section' => $section,
         ]);
     }
 }

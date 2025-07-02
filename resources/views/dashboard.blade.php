@@ -40,7 +40,10 @@
         let isLoading = false;
 
         document.addEventListener('DOMContentLoaded', function() {
-            // Debug existing products
+            // Initialize search functionality
+            initializeSearch();
+
+            // Debug existing products (keep existing code)
             document.querySelectorAll('.favorite-btn').forEach(btn => {
                 console.log('Favorite State:', btn.dataset.productId, btn.dataset.isFavorited);
             });
@@ -49,12 +52,234 @@
                 console.log('Cart State:', btn.dataset.productId, btn.dataset.inCart);
             });
 
-            // Load More Button Event
+            // Load More Button Event (keep existing code)
             const loadMoreBtn = document.getElementById('load-more-btn');
             if (loadMoreBtn) {
                 loadMoreBtn.addEventListener('click', loadMoreProducts);
             }
         });
+        let searchTimeout;
+        let currentSearchQuery = '';
+
+        function initializeSearch() {
+            // Initialize both desktop and mobile search inputs
+            const desktopSearchInput = document.querySelector('.max-w-lg input[type="text"]');
+            const mobileSearchInput = document.querySelector('.md\\:hidden input[type="text"]');
+
+            if (desktopSearchInput) {
+                setupSearchInput(desktopSearchInput);
+            }
+
+            if (mobileSearchInput) {
+                setupSearchInput(mobileSearchInput);
+            }
+        }
+
+        function setupSearchInput(input) {
+            // Add search event listeners
+            input.addEventListener('input', handleSearchInput);
+            input.addEventListener('keydown', handleSearchKeydown);
+
+            // Add search icon click functionality
+            const searchContainer = input.closest('.relative');
+            if (searchContainer) {
+                const searchIcon = searchContainer.querySelector('svg');
+                if (searchIcon) {
+                    searchIcon.style.cursor = 'pointer';
+                    searchIcon.addEventListener('click', () => performSearch(input.value));
+                }
+            }
+        }
+
+        function handleSearchInput(event) {
+            const query = event.target.value.trim();
+
+            // Clear previous timeout
+            if (searchTimeout) {
+                clearTimeout(searchTimeout);
+            }
+
+            // Debounce search - wait 500ms after user stops typing
+            searchTimeout = setTimeout(() => {
+                if (query.length >= 2 || query.length === 0) {
+                    performSearch(query);
+                }
+            }, 500);
+        }
+
+        function handleSearchKeydown(event) {
+            // Handle Enter key press
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                const query = event.target.value.trim();
+                performSearch(query);
+            }
+
+            // Handle Escape key to clear search
+            if (event.key === 'Escape') {
+                event.target.value = '';
+                performSearch('');
+            }
+        }
+
+        function performSearch(query) {
+            if (currentSearchQuery === query) {
+                return; // Avoid duplicate searches
+            }
+
+            currentSearchQuery = query;
+            currentPage = 1;
+            // Show loading state
+            showSearchLoading();
+
+            // Get current section from URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const section = urlParams.get('section') || 'all';
+
+            // Build search URL
+            const searchParams = new URLSearchParams();
+            if (query) {
+                searchParams.set('search', query);
+            }
+            if (section !== 'all') {
+                searchParams.set('section', section);
+            }
+            searchParams.set('page', '1');
+
+            const searchUrl = `/dashboard?${searchParams.toString()}`;
+
+            console.log('Search Request:', {
+                query: query,
+                section: section,
+                url: searchUrl
+            });
+
+            // Perform search request
+            fetch(searchUrl, {
+                    method: 'GET',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json',
+                    },
+                    credentials: 'same-origin',
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Search request failed');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Search Response:', data);
+
+                    if (data.success) {
+                        // Update products grid
+                        updateProductsGrid(data.html);
+
+                        // Update pagination state
+                        currentPage = data.currentPage;
+                        hasMore = data.hasMore;
+
+                        console.log('Search completed, updated state:', {
+                            currentPage: currentPage,
+                            hasMore: hasMore,
+                            total: data.total || 'unknown'
+                        });
+
+                        // Update load more button visibility
+                        updateLoadMoreButton();
+
+                        // Update URL without page reload
+                        if (query) {
+                            const newUrl = new URL(window.location);
+                            newUrl.searchParams.set('search', query);
+                            if (section !== 'all') {
+                                newUrl.searchParams.set('section', section);
+                            }
+                            newUrl.searchParams.delete('page');
+                            window.history.replaceState({}, '', newUrl);
+                        } else {
+                            // Clear search from URL
+                            const newUrl = new URL(window.location);
+                            newUrl.searchParams.delete('search');
+                            if (section === 'all') {
+                                newUrl.searchParams.delete('section');
+                            }
+                            newUrl.searchParams.delete('page');
+                            window.history.replaceState({}, '', newUrl);
+                        }
+
+                        // Show search results message
+                        showSearchResults(query, data.products ? data.products.length : 0);
+                    } else {
+                        throw new Error('Invalid search response');
+                    }
+                })
+                .catch(error => {
+                    console.error('Search error:', error);
+                    showToast('Gagal melakukan pencarian. Silakan coba lagi.', 'error');
+                })
+                .finally(() => {
+                    hideSearchLoading();
+                });
+        }
+
+        function showSearchLoading() {
+            const productsGrid = document.getElementById('products-grid');
+            const loadingSpinner = document.getElementById('loading-spinner');
+
+            if (productsGrid) {
+                productsGrid.style.opacity = '0.5';
+            }
+
+            if (loadingSpinner) {
+                loadingSpinner.classList.remove('hidden');
+            }
+        }
+
+        function hideSearchLoading() {
+            const productsGrid = document.getElementById('products-grid');
+            const loadingSpinner = document.getElementById('loading-spinner');
+
+            if (productsGrid) {
+                productsGrid.style.opacity = '1';
+            }
+
+            if (loadingSpinner) {
+                loadingSpinner.classList.add('hidden');
+            }
+        }
+
+        function updateProductsGrid(html) {
+            const productsGrid = document.getElementById('products-grid');
+            if (productsGrid && html) {
+                productsGrid.innerHTML = html;
+            }
+        }
+
+        function updateLoadMoreButton() {
+            const loadMoreContainer = document.getElementById('load-more-container');
+            const noMoreProducts = document.getElementById('no-more-products');
+
+            if (hasMore) {
+                if (loadMoreContainer) loadMoreContainer.classList.remove('hidden');
+                if (noMoreProducts) noMoreProducts.classList.add('hidden');
+            } else {
+                if (loadMoreContainer) loadMoreContainer.classList.add('hidden');
+                if (noMoreProducts) noMoreProducts.classList.remove('hidden');
+            }
+        }
+
+        function showSearchResults(query, count) {
+            if (query) {
+                const message = count > 0 ?
+                    `Ditemukan ${count} produk untuk "${query}"` :
+                    `Tidak ada produk ditemukan untuk "${query}"`;
+
+                showToast(message, count > 0 ? 'success' : 'info');
+            }
+        }
+
 
         function loadMoreProducts() {
             if (isLoading || !hasMore) return;
@@ -64,9 +289,18 @@
             const loadingSpinner = document.getElementById('loading-spinner');
             const productsGrid = document.getElementById('products-grid');
 
-            // Ambil nilai section dari URL (misal ?section=men)
+            // Get current URL parameters
             const urlParams = new URLSearchParams(window.location.search);
             const section = urlParams.get('section') || 'all';
+            const search = urlParams.get('search') || '';
+
+            console.log('Load More Request:', {
+                currentPage: currentPage,
+                nextPage: currentPage + 1,
+                section: section,
+                search: search,
+                hasMore: hasMore
+            });
 
             // Show loading state
             loadMoreBtn.disabled = true;
@@ -78,8 +312,21 @@
     `;
             loadingSpinner.classList.remove('hidden');
 
-            // Fetch dengan parameter section dan halaman
-            fetch(`/dashboard?page=${currentPage + 1}&section=${section}`, {
+            // Build URL parameters - pastikan parameter sesuai dengan yang diharapkan controller
+            const params = new URLSearchParams();
+            params.set('page', parseInt(currentPage, 10) + 1);
+
+            if (section !== 'all') {
+                params.set('section', section);
+            }
+            if (search) {
+                params.set('search', search); // Pastikan menggunakan 'search', bukan 'q'
+            }
+
+            console.log('Fetch URL:', `/dashboard?${params.toString()}`);
+
+            // Fetch with all parameters
+            fetch(`/dashboard?${params.toString()}`, {
                     method: 'GET',
                     headers: {
                         'X-Requested-With': 'XMLHttpRequest',
@@ -88,31 +335,48 @@
                     credentials: 'same-origin',
                 })
                 .then(response => {
+                    console.log('Response status:', response.status);
                     if (!response.ok) {
                         throw new Error('Network response was not ok');
                     }
                     return response.json();
                 })
                 .then(data => {
+                    console.log('Load More Response:', data);
+
                     if (data.success && data.html) {
                         const tempDiv = document.createElement('div');
                         tempDiv.innerHTML = data.html;
 
                         const newProducts = tempDiv.children;
+                        let addedCount = 0;
+
                         while (newProducts.length > 0) {
                             productsGrid.appendChild(newProducts[0]);
+                            addedCount++;
                         }
 
+                        // Update state
                         currentPage = data.currentPage;
                         hasMore = data.hasMore;
 
-                        if (!hasMore) {
-                            document.getElementById('load-more-container').classList.add('hidden');
-                            document.getElementById('no-more-products').classList.remove('hidden');
-                        }
+                        console.log('Updated state:', {
+                            currentPage: currentPage,
+                            hasMore: hasMore,
+                            addedProducts: addedCount,
+                            totalProducts: data.total || 'unknown'
+                        });
 
-                        showToast(`${data.products.length} produk baru dimuat`, 'success');
+                        // Update load more button visibility
+                        updateLoadMoreButton();
+
+                        const message = search ?
+                            `${addedCount} produk lagi dimuat untuk "${search}"` :
+                            `${addedCount} produk baru dimuat`;
+
+                        showToast(message, 'success');
                     } else {
+                        console.error('Invalid response data:', data);
                         throw new Error('Invalid response data');
                     }
                 })
@@ -129,6 +393,21 @@
                         loadMoreBtn.textContent = 'Tampilkan Lebih Banyak';
                     }
                 });
+        }
+
+        function updateLoadMoreButton() {
+            const loadMoreContainer = document.getElementById('load-more-container');
+            const noMoreProducts = document.getElementById('no-more-products');
+
+            console.log('Updating load more button, hasMore:', hasMore);
+
+            if (hasMore) {
+                if (loadMoreContainer) loadMoreContainer.classList.remove('hidden');
+                if (noMoreProducts) noMoreProducts.classList.add('hidden');
+            } else {
+                if (loadMoreContainer) loadMoreContainer.classList.add('hidden');
+                if (noMoreProducts) noMoreProducts.classList.remove('hidden');
+            }
         }
 
         function toggleFavorite(productId) {
@@ -277,30 +556,49 @@
             toast.className = `transform transition-all duration-300 ease-in-out translate-x-full opacity-0`;
 
             // Toast content based on type
-            const bgColor = type === 'success' ? 'bg-green-500' : 'bg-red-500';
-            const icon = type === 'success' ?
-                `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                </svg>` :
-                `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                </svg>`;
+            let bgColor, icon;
+
+            switch (type) {
+                case 'success':
+                    bgColor = 'bg-green-500';
+                    icon = `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+            </svg>`;
+                    break;
+                case 'error':
+                    bgColor = 'bg-red-500';
+                    icon = `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>`;
+                    break;
+                case 'info':
+                    bgColor = 'bg-blue-500';
+                    icon = `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>`;
+                    break;
+                default:
+                    bgColor = 'bg-gray-500';
+                    icon = `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>`;
+            }
 
             toast.innerHTML = `
-                <div class="${bgColor} text-white px-4 py-3 rounded-lg shadow-lg flex items-center space-x-3 min-w-64 max-w-sm">
-                    <div class="flex-shrink-0">
-                        ${icon}
-                    </div>
-                    <div class="flex-1">
-                        <p class="text-sm font-medium">${message}</p>
-                    </div>
-                    <button onclick="removeToast(this)" class="flex-shrink-0 ml-2 text-white hover:text-gray-200 transition-colors">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                        </svg>
-                    </button>
-                </div>
-            `;
+        <div class="${bgColor} text-white px-4 py-3 rounded-lg shadow-lg flex items-center space-x-3 min-w-64 max-w-sm">
+            <div class="flex-shrink-0">
+                ${icon}
+            </div>
+            <div class="flex-1">
+                <p class="text-sm font-medium">${message}</p>
+            </div>
+            <button onclick="removeToast(this)" class="flex-shrink-0 ml-2 text-white hover:text-gray-200 transition-colors">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+        </div>
+    `;
 
             toastContainer.appendChild(toast);
 
@@ -329,6 +627,21 @@
                 }, 300);
             }
         }
+
+        document.addEventListener('keydown', function(event) {
+            if ((event.metaKey || event.ctrlKey) && event.key === 'k') {
+                event.preventDefault();
+
+                // Focus on search input
+                const searchInput = document.querySelector('.max-w-lg input[type="text"]') ||
+                    document.querySelector('.md\\:hidden input[type="text"]');
+
+                if (searchInput) {
+                    searchInput.focus();
+                    searchInput.select();
+                }
+            }
+        });
     </script>
 
     <style>
