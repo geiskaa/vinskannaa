@@ -207,4 +207,14 @@ class ProductController extends Controller
             'section' => $section,
         ]);
     }
+
+    public function show($slug)
+    {
+        $product = Product::where('slug', $slug)
+            ->with('ratings') // jika ada relasi
+            ->firstOrFail();
+
+        return view('detail-produk', compact('product'));
+    }
+
 }
