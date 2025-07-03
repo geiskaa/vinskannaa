@@ -19,7 +19,7 @@ return new class extends Migration {
             $table->enum('status', ['pending', 'paid', 'expired', 'canceled'])->default('pending');
 
             // Status proses pesanan internal
-            $table->enum('order_status', ['menunggu_konfirmasi', 'diproses', "dikirim", 'selesai', 'dibatalkan'])->default('menunggu_konfirmasi');
+            $table->enum('order_status', ['menunggu_konfirmasi', 'dikonfirmasi', 'diproses', "dikirim", 'selesai', 'dibatalkan'])->default('menunggu_konfirmasi');
 
             // Total belanja & ongkir
             $table->decimal('total_amount', 12, 2);
