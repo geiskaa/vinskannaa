@@ -185,6 +185,185 @@
                             </div>
                         </form>
                     </div>
+
+                    <div class="p-6" x-show="activeTab === 'profile'">
+                        @if (isset($completedOrders) && $completedOrders->count() > 0)
+                            <div class="space-y-6">
+                                @foreach ($completedOrders as $order)
+                                    <div
+                                        class="border border-gray-200 rounded-xl overflow-hidden hover:shadow-md transition-shadow">
+                                        <!-- Order Header -->
+                                        <div class="bg-gray-50 px-6 py-4 border-b border-gray-200">
+                                            <div class="flex items-center justify-between">
+                                                <div class="flex items-center space-x-4">
+                                                    <div>
+                                                        <h3 class="text-lg font-semibold text-gray-900">
+                                                            Pesanan #{{ $order->order_number ?? $order->id }}
+                                                        </h3>
+                                                        <p class="text-sm text-gray-600">
+                                                            {{ $order->created_at->format('d M Y, H:i') }} WIB
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                                <div class="text-right">
+                                                    <span
+                                                        class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                                        <svg class="w-3 h-3 mr-1" fill="currentColor"
+                                                            viewBox="0 0 20 20">
+                                                            <path fill-rule="evenodd"
+                                                                d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                                                clip-rule="evenodd"></path>
+                                                        </svg>
+                                                        Selesai
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Order Items -->
+                                        <div class="p-6">
+                                            <div class="space-y-4">
+                                                @foreach ($order->orderItems as $item)
+                                                    <div class="flex items-center space-x-4">
+                                                        <!-- Product Image -->
+                                                        <div
+                                                            class="flex-shrink-0 w-16 h-16 bg-gray-100 rounded-lg overflow-hidden">
+                                                            @if ($item->product->images && count($item->product->images) > 0)
+                                                                <img src="{{ asset('storage/' . $item->product->images[0]) }}"
+                                                                    alt="{{ $item->product->name }}"
+                                                                    class="w-full h-full object-cover">
+                                                            @else
+                                                                <div
+                                                                    class="w-full h-full flex items-center justify-center text-gray-400">
+                                                                    <svg class="w-6 h-6" fill="none"
+                                                                        stroke="currentColor" viewBox="0 0 24 24">
+                                                                        <path stroke-linecap="round"
+                                                                            stroke-linejoin="round" stroke-width="2"
+                                                                            d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z">
+                                                                        </path>
+                                                                    </svg>
+                                                                </div>
+                                                            @endif
+                                                        </div>
+
+                                                        <!-- Product Details -->
+                                                        <div class="flex-1 min-w-0">
+                                                            <h4 class="text-sm font-medium text-gray-900 truncate">
+                                                                {{ $item->product->name }}
+                                                            </h4>
+                                                            <p class="text-sm text-gray-500">
+                                                                {{ $item->product->category->name ?? 'Tanpa Kategori' }}
+                                                            </p>
+                                                            <div class="flex items-center mt-1 space-x-4">
+                                                                <span class="text-sm text-gray-600">
+                                                                    Qty: {{ $item->quantity }}
+                                                                </span>
+                                                                <span class="text-sm font-medium text-gray-900">
+                                                                    Rp {{ number_format($item->price, 0, ',', '.') }}
+                                                                </span>
+                                                            </div>
+                                                        </div>
+
+                                                        <!-- Subtotal -->
+                                                        <div class="flex-shrink-0 text-right">
+                                                            <p class="text-sm font-medium text-gray-900">
+                                                                Rp
+                                                                {{ number_format($item->price * $item->quantity, 0, ',', '.') }}
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                @endforeach
+                                            </div>
+
+                                            <!-- Order Summary -->
+                                            <div class="mt-6 pt-6 border-t border-gray-200">
+                                                <div class="flex items-center justify-between">
+                                                    <div class="flex items-center space-x-4">
+                                                        <span class="text-sm text-gray-600">
+                                                            {{ $order->orderItems->count() }} item(s)
+                                                        </span>
+                                                        @if ($order->shipping_address)
+                                                            <span class="text-sm text-gray-600">
+                                                                • Dikirim ke:
+                                                                {{ Str::limit($order->shipping_address, 30) }}
+                                                            </span>
+                                                        @endif
+                                                    </div>
+                                                    <div class="text-right">
+                                                        <p class="text-sm text-gray-600">Total Pesanan</p>
+                                                        <p class="text-lg font-bold text-gray-900">
+                                                            Rp {{ number_format($order->total_amount, 0, ',', '.') }}
+                                                        </p>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Action Buttons -->
+                                                <div class="mt-4 flex items-center justify-between">
+                                                    <div class="flex items-center space-x-2">
+                                                        @if ($order->completed_at)
+                                                            <span class="text-xs text-gray-500">
+                                                                Selesai pada
+                                                                {{ $order->completed_at->format('d M Y, H:i') }}
+                                                            </span>
+                                                        @endif
+                                                    </div>
+                                                    <div class="flex items-center space-x-3">
+                                                        <button onclick="viewOrderDetails({{ $order->id }})"
+                                                            class="text-sm text-indigo-600 hover:text-indigo-700 font-medium">
+                                                            Lihat Detail
+                                                        </button>
+                                                        @if ($order->can_reorder)
+                                                            <button onclick="reorderItems({{ $order->id }})"
+                                                                class="inline-flex items-center px-3 py-1.5 text-xs font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition-colors">
+                                                                <svg class="w-3 h-3 mr-1" fill="none"
+                                                                    stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                                        stroke-width="2"
+                                                                        d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15">
+                                                                    </path>
+                                                                </svg>
+                                                                Pesan Lagi
+                                                            </button>
+                                                        @endif
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+
+                            <!-- Pagination -->
+                            @if ($completedOrders->hasPages())
+                                <div class="mt-8 flex justify-center">
+                                    {{ $completedOrders->links() }}
+                                </div>
+                            @endif
+                        @else
+                            <!-- Empty State -->
+                            <div class="text-center py-12">
+                                <div
+                                    class="mx-auto w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                                    <svg class="w-12 h-12 text-gray-400" fill="none" stroke="currentColor"
+                                        viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01">
+                                        </path>
+                                    </svg>
+                                </div>
+                                <h3 class="text-lg font-medium text-gray-900 mb-2">Belum Ada Riwayat Pesanan</h3>
+                                <p class="text-gray-600 mb-6">Anda belum memiliki pesanan yang selesai.</p>
+                                <a href="{{ route('dashboard') }}"
+                                    class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition-colors">
+                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
+                                    </svg>
+                                    Mulai Belanja
+                                </a>
+                            </div>
+                        @endif
+                    </div>
                 </div>
             </div>
         </div>
