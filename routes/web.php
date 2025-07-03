@@ -53,3 +53,28 @@ Route::get('/edit/profle', [AuthController::class, 'showEditProfile'])->name('pr
 Route::get('/checkout', [OrderController::class, 'checkout'])->name('checkout');
 Route::post('/checkout/token', [OrderController::class, 'getSnapToken']);
 Route::get('/search', [ProductController::class, 'search'])->name('search');
+
+Route::middleware('auth')->group(function () {
+
+    // Halaman pesanan saya dan wishlist
+    Route::get('/pesanan-saya', [OrderController::class, 'pesananSaya'])->name('pesananSaya');
+
+    // Detail pesanan
+    Route::get('/pesanan-saya/{id}', [OrderController::class, 'detailPesanan'])->name('detailpesanan');
+
+    // Batalkan pesanan
+    Route::post('/pesanan-saya/{id}/cancel', [OrderController::class, 'cancel'])->name('orders.cancel');
+
+    // Hapus dari wishlist/favorites
+    Route::delete('/favorites/{id}', [OrderController::class, 'removeFavorite'])->name('favorites.remove');
+
+    // Tambah ke keranjang dari wishlist
+    Route::post('/cart/add', [OrderController::class, 'addToCart'])->name('cart.add');
+
+    // Rating pesanan
+    Route::get('/pesanan-saya/{id}/rate', action: [OrderController::class, 'showRatingForm'])->name('orders.rate');
+    Route::post('/pesanan-saya/{id}/rate', [OrderController::class, 'storeRating'])->name('orders.rate.store');
+
+});
+
+Route::get('/products/{slug}', [ProductController::class, 'show'])->name('product.show');

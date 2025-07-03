@@ -3,10 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Models\Cart;
+use App\Models\Favorite;
 use App\Models\Order;
 use App\Models\OrderItem;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Midtrans\Snap;
 use Midtrans\Config;
 
@@ -111,6 +113,7 @@ class OrderController extends Controller
                 'order_id' => $orderId,
                 'status' => 'pending',
                 'order_status' => 'menunggu_konfirmasi',
+                'tax_cost' => $tax,
                 'total_amount' => $grossAmount,
                 'shipping_cost' => $shippingCost,
                 'shipping_method' => $validated['shipping_method'],
@@ -251,6 +254,194 @@ class OrderController extends Controller
             ], 500);
         }
     }
+
+    public function pesananSaya()
+    { {
+            // Ambil pesanan user yang sedang login
+            $orders = Order::where('user_id', Auth::id())
+                ->with(['items.product', 'user'])
+                ->orderBy('created_at', 'desc')
+                ->get();
+
+            // Ambil favorites user yang sedang login
+            $favorites = Favorite::where('user_id', Auth::id())
+                ->with(['product'])
+                ->orderBy('created_at', 'desc')
+                ->get();
+
+            return view('pesanan-saya', compact('orders', 'favorites'));
+        }
+    }
+
+    public function detailPesanan($id)
+    {
+        $order = Order::where('user_id', Auth::id())
+            ->where('id', $id)
+            ->with(['items.product', 'user'])
+            ->firstOrFail();
+
+        return view('detail-pesanan', compact('order'));
+    }
+
+    public function cancel(Request $request, $id)
+    {
+        try {
+            $order = Order::where('user_id', Auth::id())
+                ->where('id', $id)
+                ->firstOrFail();
+
+            Log::info('Cancel Order Request', [
+                'user_id' => Auth::id(),
+                'order_id' => $order->id,
+                'request_data' => $request->all()
+            ]);
+
+            if ($order->order_status !== 'menunggu_konfirmasi') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Pesanan tidak dapat dibatalkan'
+                ], 400);
+            }
+
+            $order->update([
+                'order_status' => 'dibatalkan',
+                'canceled_at' => now(),
+                'cancel_reason' => $request->input('reason', 'Dibatalkan oleh pelanggan')
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Pesanan berhasil dibatalkan'
+            ]);
+        } catch (\Throwable $e) {
+            Log::error('Gagal membatalkan pesanan', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan server: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function removeFavorite($id)
+    {
+        $favorite = Favorite::where('user_id', Auth::id())
+            ->where('id', $id)
+            ->firstOrFail();
+
+        $favorite->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Produk berhasil dihapus dari wishlist'
+        ]);
+    }
+
+    public function addToCart(Request $request)
+    {
+        $request->validate([
+            'product_id' => 'required|exists:products,id',
+            'quantity' => 'required|integer|min:1',
+            'price' => 'required|numeric|min:0'
+        ]);
+
+        // Cek apakah produk sudah ada di cart
+        $existingCartItem = \App\Models\Cart::where('user_id', Auth::id())
+            ->where('product_id', $request->product_id)
+            ->first();
+
+        if ($existingCartItem) {
+            // Update quantity jika sudah ada
+            $existingCartItem->increment('quantity', $request->quantity);
+        } else {
+            // Buat cart item baru
+            \App\Models\Cart::create([
+                'user_id' => Auth::id(),
+                'product_id' => $request->product_id,
+                'quantity' => $request->quantity,
+                'price' => $request->price
+            ]);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Produk berhasil ditambahkan ke keranjang'
+        ]);
+    }
+
+    /**
+     * Show rating form for completed order
+     */
+    public function showRatingForm($id)
+    {
+        $order = Order::where('user_id', Auth::id())
+            ->where('id', $id)
+            ->with(['items.product'])
+            ->firstOrFail();
+
+        // Log akses form rating
+        Log::info('Akses form rating pesanan', [
+            'user_id' => Auth::id(),
+            'order_id' => $order->id,
+            'order_status' => $order->order_status,
+        ]);
+        // Cek apakah order sudah selesai
+        if ($order->order_status !== 'selesai') {
+            Log::warning('User mencoba mengakses form rating sebelum pesanan selesai', [
+                'user_id' => Auth::id(),
+                'order_id' => $order->id,
+                'order_status' => $order->order_status,
+            ]);
+
+            return redirect()->route('pesananSaya')
+                ->with('error', 'Pesanan belum selesai');
+        }
+
+        return view('rating-pesanan', compact('order'));
+    }
+
+    /**
+     * Store rating for order
+     */
+    public function storeRating(Request $request, $id)
+    {
+        $order = Order::where('user_id', Auth::id())
+            ->where('id', $id)
+            ->with(['items.product'])
+            ->firstOrFail();
+
+        $request->validate([
+            'ratings' => 'required|array',
+            'ratings.*.product_id' => 'required|exists:products,id',
+            'ratings.*.rating' => 'required|integer|min:1|max:5',
+            'ratings.*.review' => 'nullable|string|max:500'
+        ]);
+
+        foreach ($request->ratings as $rating) {
+            // Cek apakah sudah ada rating untuk produk ini dari order ini
+            $existingRating = \App\Models\ProductRating::where('user_id', Auth::id())
+                ->where('product_id', $rating['product_id'])
+                ->where('order_id', $order->id)
+                ->first();
+
+            if (!$existingRating) {
+                \App\Models\ProductRating::create([
+                    'user_id' => Auth::id(),
+                    'product_id' => $rating['product_id'],
+                    'order_id' => $order->id,
+                    'rating' => $rating['rating'],
+                    'ulasan' => $rating['review'] ?? null
+                ]);
+            }
+        }
+
+        return redirect()->route('pesananSaya')
+            ->with('success', 'Rating berhasil disimpan');
+    }
+
 
     private function calculateDiscount($subtotal)
     {
