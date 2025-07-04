@@ -17,9 +17,9 @@ class ProfileController extends Controller
     {
         $user = Auth::user();
         $addresses = $user->addresses()->get();
-        $completedOrders = Order::with(['orderItems.product.category', 'orderItems.product.images'])
+        $completedOrders = Order::with(['items.product'])
             ->where('user_id', Auth::id())
-            ->where('order_status', 'completed') // atau 'selesai' sesuai dengan enum/status yang Anda gunakan
+            ->where('order_status', 'selesai')
             ->orderBy('completed_at', 'desc')
             ->orderBy('created_at', 'desc')
             ->paginate(10);

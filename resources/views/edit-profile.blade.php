@@ -58,7 +58,8 @@
                 </div>
             @endif
 
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Main Container with Single x-data -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8" x-data="{ activeTab: 'profile' }">
                 <!-- Left Sidebar -->
                 <div class="lg:col-span-1">
                     <div class="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
@@ -86,7 +87,7 @@
                         </div>
 
                         <!-- Navigation Menu -->
-                        <nav class="p-4 space-y-2" x-data="{ activeTab: 'profile' }">
+                        <nav class="p-4 space-y-2">
                             <button @click="activeTab = 'profile'"
                                 :class="{ 'bg-indigo-50 text-indigo-600 border-indigo-200': activeTab === 'profile' }"
                                 class="w-full flex items-center px-4 py-3 text-left text-sm font-medium text-gray-700 border border-transparent rounded-lg hover:bg-gray-50 transition-colors">
@@ -110,7 +111,7 @@
                 </div>
 
                 <!-- Main Content -->
-                <div class="lg:col-span-2" x-data="{ activeTab: 'profile' }">
+                <div class="lg:col-span-2">
                     <!-- Profile Information Tab -->
                     <div x-show="activeTab === 'profile'" class="bg-white rounded-2xl shadow-lg border border-gray-100">
                         <div class="px-6 py-4 border-b border-gray-100">
@@ -350,25 +351,83 @@
                             <h2 class="text-xl font-semibold text-gray-900">Riwayat Pesanan</h2>
                             <p class="text-gray-600">Lihat semua pesanan yang pernah Anda buat.</p>
                         </div>
+
                         <div class="p-6">
-                            <div class="text-center py-12">
-                                <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor"
-                                    viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2">
-                                    </path>
-                                </svg>
-                                <h3 class="mt-4 text-lg font-medium text-gray-900">Belum ada pesanan</h3>
-                                <p class="mt-2 text-gray-500">Mulai berbelanja untuk melihat riwayat pesanan Anda.</p>
-                                <div class="mt-6">
-                                    <a href="{{ route('dashboard') }}"
-                                        class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700">
-                                        Mulai Belanja
-                                    </a>
+                            @if ($completedOrders->isEmpty())
+                                <div class="text-center py-12">
+                                    <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor"
+                                        viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2">
+                                        </path>
+                                    </svg>
+                                    <h3 class="mt-4 text-lg font-medium text-gray-900">Belum ada pesanan</h3>
+                                    <p class="mt-2 text-gray-500">Mulai berbelanja untuk melihat riwayat pesanan Anda.</p>
+                                    <div class="mt-6">
+                                        <a href="{{ route('dashboard') }}"
+                                            class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700">
+                                            Mulai Belanja
+                                        </a>
+                                    </div>
                                 </div>
-                            </div>
+                            @else
+                                @foreach ($completedOrders as $order)
+                                    <div class="mb-4 border border-gray-200 rounded-xl p-4">
+                                        <h3 class="font-semibold text-gray-800 mb-1">
+                                            Pesanan #{{ $order->order_id }} - {{ $order->created_at->format('d M Y') }}
+                                        </h3>
+
+                                        <p class="text-sm text-gray-600 mb-2">
+                                            Status: <span
+                                                class="font-semibold capitalize">{{ $order->order_status }}</span><br>
+                                            Tipe Pembayaran: <span
+                                                class="capitalize">{{ $order->payment_type ?? '-' }}</span><br>
+                                            Pengiriman: {{ ucfirst($order->shipping_method ?? '-') }}<br>
+                                            Alamat: {{ $order->shipping_address ?? '-' }}
+                                        </p>
+
+                                        <div class="mt-2 space-y-2">
+                                            @foreach ($order->items as $item)
+                                                <div class="flex items-center gap-4">
+                                                    <img src="{{ $item->product->images[0] ?? '/img/placeholder.png' }}"
+                                                        alt="{{ $item->product->name }}"
+                                                        class="w-14 h-14 rounded  object-cover">
+                                                    <div>
+                                                        <div class="text-sm font-medium text-gray-900">
+                                                            {{ $item->product->name }}</div>
+                                                        <div class="text-sm text-gray-500">
+                                                            Kategori: {{ $item->product->category ?? '-' }}
+                                                        </div>
+                                                        <div class="text-sm text-gray-500">
+                                                            Jumlah: {{ $item->quantity }} | Harga:
+                                                            Rp{{ number_format($item->price, 0, ',', '.') }}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            @endforeach
+                                        </div>
+
+                                        <div class="mt-4 border-t pt-3 text-sm text-gray-700">
+                                            <div>Total Belanja:
+                                                <strong>Rp{{ number_format($order->total_amount, 0, ',', '.') }}</strong>
+                                            </div>
+                                            <div>Ongkir: Rp{{ number_format($order->shipping_cost, 0, ',', '.') }}</div>
+                                            <div>Pajak: Rp{{ number_format($order->tax_cost, 0, ',', '.') }}</div>
+                                            <div class="text-gray-500 mt-1">Selesai pada:
+                                                {{ \Carbon\Carbon::parse($order->completed_at)->format('d M Y H:i') }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endforeach
+
+
+                                <div class="mt-4">
+                                    {{ $completedOrders->links() }}
+                                </div>
+                            @endif
                         </div>
                     </div>
+
                 </div>
             </div>
             @php
