@@ -7,7 +7,7 @@
                 <div class="absolute top-2 right-2 z-10 flex flex-col space-y-2">
                     <!-- Favorite Button -->
                     <button onclick="toggleFavorite({{ $product->id }})"
-                        class="p-2 rounded-full bg-white bg-opacity-80 hover:bg-opacity-100 transition-all duration-200 shadow-sm hover:shadow-md favorite-btn transform hover:scale-110"
+                        class="p-2 rounded-full cursor-pointer bg-white bg-opacity-80 hover:bg-opacity-100 transition-all duration-200 shadow-sm hover:shadow-md favorite-btn transform hover:scale-110"
                         data-product-id="{{ $product->id }}"
                         data-is-favorited="{{ $product->is_favorited ? 'true' : 'false' }}">
                         <svg class="w-5 h-5 transition-all duration-300 {{ $product->is_favorited ? 'text-red-500 fill-current scale-110' : 'text-gray-400' }}"
@@ -21,7 +21,7 @@
 
                     <!-- Cart Button -->
                     <button onclick="toggleCart({{ $product->id }})"
-                        class="p-2 rounded-full bg-white bg-opacity-80 hover:bg-opacity-100 transition-all duration-200 shadow-sm hover:shadow-md cart-btn transform hover:scale-110"
+                        class="p-2 rounded-full cursor-pointer bg-white bg-opacity-80 hover:bg-opacity-100 transition-all duration-200 shadow-sm hover:shadow-md cart-btn transform hover:scale-110"
                         data-product-id="{{ $product->id }}" data-in-cart="{{ $product->in_cart ? 'true' : 'false' }}"
                         {{ $product->stock !== null && $product->stock <= 0 ? 'disabled' : '' }}>
                         <svg class="w-5 h-5 transition-all duration-300 {{ $product->in_cart ? 'text-green-600 scale-110' : 'text-gray-400' }}"

@@ -25,7 +25,7 @@
                 </div>
                 @if ($cartItems->count() > 0)
                     <button onclick="clearCart()"
-                        class="group flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-red-500 to-pink-600 text-white rounded-xl hover:from-red-600 hover:to-pink-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105">
+                        class="cursor-pointer group flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-red-500 to-pink-600 text-white rounded-xl hover:from-red-600 hover:to-pink-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105">
                         <svg class="w-4 h-4 group-hover:rotate-12 transition-transform duration-300" fill="none"
                             stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -159,7 +159,7 @@
                                             <!-- Plus Button -->
                                             <button
                                                 onclick="updateCartQuantity({{ $item->id }}, {{ $item->quantity + 1 }})"
-                                                class="quantity-btn px-4 py-3 text-gray-600 hover:text-white hover:bg-gradient-to-r hover:from-green-500 hover:to-blue-600 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-green-300 {{ $item->product->stock !== null && $item->quantity >= $item->product->stock ? 'opacity-50 cursor-not-allowed' : '' }}"
+                                                class="quantity-btn px-4 py-3 cursor-pointer text-gray-600 hover:text-white hover:bg-gradient-to-r hover:from-green-500 hover:to-blue-600 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-green-300 {{ $item->product->stock !== null && $item->quantity >= $item->product->stock ? 'opacity-50 cursor-not-allowed' : '' }}"
                                                 {{ $item->product->stock !== null && $item->quantity >= $item->product->stock ? 'disabled' : '' }}
                                                 title="Tambah jumlah" data-action="increase">
                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor"
@@ -172,7 +172,7 @@
 
                                         <!-- Enhanced Remove Button -->
                                         <button onclick="removeFromCart({{ $item->id }})"
-                                            class="group p-3 bg-gradient-to-r from-red-100 to-pink-100 text-red-600 hover:from-red-500 hover:to-pink-600 hover:text-white rounded-2xl transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-red-300"
+                                            class="group cursor-pointer p-3 bg-gradient-to-r from-red-100 to-pink-100 text-red-600 hover:from-red-500 hover:to-pink-600 hover:text-white rounded-2xl transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-red-300"
                                             title="Hapus dari keranjang">
                                             <svg class="w-5 h-5 group-hover:rotate-12 transition-transform duration-300"
                                                 fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -257,20 +257,23 @@
                             </div>
 
                             <!-- Enhanced Checkout Button -->
-                            <button
-                                class="group w-full bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 text-white py-4 px-6 rounded-2xl hover:from-blue-700 hover:via-purple-700 hover:to-indigo-700 transition-all duration-300 font-bold text-lg shadow-2xl hover:shadow-purple-500/25 transform hover:scale-105 relative overflow-hidden focus:outline-none focus:ring-2 focus:ring-purple-300">
+                            <button onclick="window.location.href='{{ route('checkout') }}'"
+                                class="cursor-pointer group w-full bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 text-white py-4 px-6 rounded-2xl hover:from-blue-700 hover:via-purple-700 hover:to-indigo-700 transition-all duration-300 font-bold text-lg shadow-2xl hover:shadow-purple-500/25 transform hover:scale-105 relative overflow-hidden focus:outline-none focus:ring-2 focus:ring-purple-300">
+
                                 <span class="relative z-10 flex items-center justify-center space-x-2">
                                     <svg class="w-6 h-6 group-hover:rotate-12 transition-transform duration-300"
                                         fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
+                                            d="M17 8l4 4m0 0l-4 4m4-4H3" />
                                     </svg>
                                     <span>Lanjut ke Checkout</span>
                                 </span>
+
                                 <div
                                     class="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-1000">
                                 </div>
                             </button>
+
 
                             <!-- Trust Badges -->
                             <div class="grid grid-cols-3 gap-3 pt-4">

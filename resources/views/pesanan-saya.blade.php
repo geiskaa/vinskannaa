@@ -219,32 +219,32 @@
                                         <!-- Action Buttons -->
                                         <div class="flex justify-end space-x-2 mt-3">
                                             <button onclick="viewOrderDetail('{{ $order->id }}')"
-                                                class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50">
+                                                class="cursor-pointer px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50">
                                                 Lihat Detail
                                             </button>
 
                                             @if ($order->order_status == 'selesai' && !$hasRated)
                                                 <button onclick="rateOrder('{{ $order->id }}')"
-                                                    class="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700">
+                                                    class="cursor-pointer px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700">
                                                     Beri Rating
                                                 </button>
                                             @elseif ($order->order_status == 'selesai' && $hasRated)
                                                 <button disabled
-                                                    class="px-4 py-2 text-sm font-medium text-gray-400 bg-gray-100 border border-gray-300 rounded-md cursor-not-allowed">
+                                                    class=" px-4 py-2 text-sm font-medium text-gray-400 bg-gray-100 border border-gray-300 rounded-md cursor-not-allowed">
                                                     Sudah Diberi Rating
                                                 </button>
                                             @endif
 
                                             @if ($order->order_status === 'menunggu_konfirmasi' && $order->status !== 'paid')
                                                 <button onclick="cancelOrder('{{ $order->id }}')"
-                                                    class="px-4 py-2 text-sm font-medium text-red-600 bg-white border border-red-300 rounded-md hover:bg-red-50">
+                                                    class="cursor-pointer px-4 py-2 text-sm font-medium text-red-600 bg-white border border-red-300 rounded-md hover:bg-red-50">
                                                     Batalkan
                                                 </button>
                                             @endif
 
                                             @if ($order->order_status === 'dikirim' && $order->status == 'paid')
                                                 <button onclick="completeOrder('{{ $order->id }}')"
-                                                    class="px-4 py-2 text-sm font-medium text-green-600 bg-white border border-green-300 rounded-md hover:bg-green-50">
+                                                    class="cursor-pointer px-4 py-2 text-sm font-medium text-green-600 bg-white border border-green-300 rounded-md hover:bg-green-50">
                                                     Selesaikan
                                                 </button>
                                             @endif
@@ -253,14 +253,14 @@
                                         @auth('seller')
                                             @if ($order->order_status === 'menunggu_konfirmasi')
                                                 <button onclick="confirmOrder('{{ $order->id }}')"
-                                                    class="px-4 py-2 text-sm font-medium text-indigo-600 bg-white border border-indigo-300 rounded-md hover:bg-indigo-50">
+                                                    class="cursor-pointer px-4 py-2 text-sm font-medium text-indigo-600 bg-white border border-indigo-300 rounded-md hover:bg-indigo-50">
                                                     Konfirmasi
                                                 </button>
                                             @endif
 
                                             @if ($order->order_status === 'dikonfirmasi')
                                                 <button onclick="markAsReadyToShip('{{ $order->id }}')"
-                                                    class="px-4 py-2 text-sm font-medium text-orange-600 bg-white border border-orange-300 rounded-md hover:bg-orange-50">
+                                                    class="cursor-pointer px-4 py-2 text-sm font-medium text-orange-600 bg-white border border-orange-300 rounded-md hover:bg-orange-50">
                                                     Perlu Diproses
                                                 </button>
                                             @endif
@@ -478,6 +478,7 @@
 
         // Fungsi utama untuk update status
         function updateOrderStatus(orderId, newStatus, cancelReason = null) {
+            console.log('Updating order status:', orderId, newStatus, cancelReason);
             // Tampilkan loading
             const button = event.target;
             const originalText = button.textContent;

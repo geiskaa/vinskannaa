@@ -124,7 +124,7 @@
                 </a>
                 <div class="relative" x-data="{ open: false }">
                     <button @click="open = !open"
-                        class="flex items-center space-x-3 p-2 rounded-xl hover:bg-gray-50 transition-all duration-200 group">
+                        class="flex cursor-pointer items-center space-x-3 p-2 rounded-xl hover:bg-gray-50 transition-all duration-200 group">
                         <div
                             class="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center text-white font-bold shadow-md group-hover:shadow-lg transition-shadow">
                             {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}

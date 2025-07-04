@@ -4,6 +4,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SocialLoginController;
 use Illuminate\Support\Facades\Route;
 
@@ -48,7 +49,10 @@ Route::middleware(['auth'])->group(function () {
 
 });
 
-Route::get('/edit/profle', [AuthController::class, 'showEditProfile'])->name('profile.edit');
+Route::get('/edit/profle', [ProfileController::class, 'showEditProfile'])->name('profile.edit');
+Route::put('/edit/update', [ProfileController::class, 'update'])->name('profile.update');
+Route::delete('/profile/address/{address}', [ProfileController::class, 'deleteAddress'])->name('profile.address.delete');
+Route::patch('/profile/address/{address}/primary', [ProfileController::class, 'setPrimaryAddress'])->name('profile.address.setPrimary');
 
 Route::get('/checkout', [OrderController::class, 'checkout'])->name('checkout');
 Route::post('/checkout/token', [OrderController::class, 'getSnapToken']);
