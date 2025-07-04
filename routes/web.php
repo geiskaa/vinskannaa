@@ -5,6 +5,7 @@ use App\Http\Controllers\CartController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\SellerController;
 use App\Http\Controllers\SocialLoginController;
 use Illuminate\Support\Facades\Route;
 
@@ -85,3 +86,12 @@ Route::get('/products/{slug}', [ProductController::class, 'show'])->name('produc
 Route::post('/handle-payment-success', [OrderController::class, 'handlePaymentSuccess']);
 Route::post('/handle-payment-failed', [OrderController::class, 'handlePaymentFailed']);
 Route::put('/pesanan-saya/{id}/update-status', [OrderController::class, 'updateStatus'])->name('orders.update-status');
+
+Route::prefix('seller')->name('seller.')->group(function () {
+    Route::get('/dashboard', [SellerController::class, 'dashboard'])->name('dashboard');
+    Route::get('/all-produk', [SellerController::class, 'allProduk'])->name('all-produk');
+    Route::get('/list-pesanan', [SellerController::class, 'listPesanan'])->name('list-pesanan');
+    Route::get('/detail-produk/{slug}', [SellerController::class, 'detailProduk'])->name('detail-produk');
+    Route::get('/tambah-produk', [SellerController::class, 'tambahProduk'])->name('tambah-produk');
+    Route::get('/edit-produk/{id}', [SellerController::class, 'editProduk'])->name('edit-produk');
+});
