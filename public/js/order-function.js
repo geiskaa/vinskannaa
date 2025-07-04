@@ -33,35 +33,6 @@ function cancelOrder(orderId) {
             });
     });
 }
-function completeOrder(orderId) {
-    const message = "Apakah Anda yakin ingin membatalkan pesanan ini?";
-
-    confirmAction(message, () => {
-        fetchWithErrorHandling(`/pesanan-saya/${orderId}/cancel`, {
-            method: "POST",
-        })
-            .then((data) => {
-                if (data.success) {
-                    showToast("Pesanan berhasil dibatalkan", "success");
-                    setTimeout(() => {
-                        location.reload();
-                    }, 1500);
-                } else {
-                    showToast(
-                        data.message || "Gagal membatalkan pesanan",
-                        "error"
-                    );
-                }
-            })
-            .catch((error) => {
-                console.error("Cancel order error:", error);
-                showToast(
-                    "Terjadi kesalahan saat membatalkan pesanan",
-                    "error"
-                );
-            });
-    });
-}
 
 // View order detail
 function viewOrderDetail(orderId) {

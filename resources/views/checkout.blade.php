@@ -30,66 +30,120 @@
             <div class="lg:col-span-2 space-y-6">
                 <!-- Shipping Address Section -->
                 <div class="bg-white rounded-lg border border-gray-200 p-6">
-                    <h2 class="text-xl font-semibold text-gray-900 mb-4 flex items-center">
-                        <svg class="w-5 h-5 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z">
-                            </path>
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                        </svg>
-                        Alamat Pengiriman
-                    </h2>
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="text-xl font-semibold text-gray-900 flex items-center">
+                            <svg class="w-5 h-5 mr-2 text-blue-600" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z">
+                                </path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                            </svg>
+                            Alamat Pengiriman
+                        </h2>
+                        @if ($addresses->count() > 1)
+                            <button type="button" id="change-address-btn"
+                                class="text-blue-600 hover:text-blue-800 font-medium text-sm">
+                                Ubah Alamat
+                            </button>
+                        @endif
+                    </div>
 
                     <form id="checkout-form" action="/checkout/token" method="POST">
                         @csrf
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <label for="full_name" class="block text-sm font-medium text-gray-700 mb-1">Nama
-                                    Lengkap</label>
-                                <input type="text" id="name" name="name"
-                                    value="{{ old('name', auth()->user()->name) }}"
-                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                    required>
-                            </div>
-                            <div>
-                                <label for="phone" class="block text-sm font-medium text-gray-700 mb-1">Nomor
-                                    Telepon</label>
-                                <input type="tel" id="phone" name="phone" value="{{ old('phone') }}"
-                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                    required>
-                            </div>
+
+                        <!-- Current Selected Address Display -->
+                        <div id="selected-address-display" class="border border-gray-200 rounded-lg p-4 bg-gray-50">
+                            @if ($primaryAddress)
+                                <input type="hidden" name="address_id" value="{{ $primaryAddress->id }}"
+                                    id="selected-address-id">
+                                <div class="flex items-start justify-between">
+                                    <div class="flex-1">
+                                        <div class="flex items-center mb-2">
+                                            <h3 class="font-semibold text-gray-900">{{ $primaryAddress->recipient_name }}
+                                            </h3>
+                                            @if ($primaryAddress->label)
+                                                <span
+                                                    class="ml-2 px-2 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded">
+                                                    {{ $primaryAddress->label }}
+                                                </span>
+                                            @endif
+                                            @if ($primaryAddress->is_primary)
+                                                <span
+                                                    class="ml-2 px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded">
+                                                    Utama
+                                                </span>
+                                            @endif
+                                        </div>
+                                        <p class="text-gray-600 mb-1">{{ $primaryAddress->phone }}</p>
+                                        <p class="text-gray-600">{{ $primaryAddress->formatted_address }}</p>
+                                    </div>
+
+                                </div>
+                            @else
+                                <div class="text-center py-4">
+                                    <p class="text-gray-500 mb-2">Belum ada alamat tersimpan</p>
+                                    <button type="button" class="text-blue-600 hover:text-blue-800 font-medium"
+                                        onclick="window.location.href='{{ route('profile.edit') }}'">
+                                        Tambah Alamat Baru
+                                    </button>
+                                </div>
+                            @endif
                         </div>
 
-                        <div class="mt-4">
-                            <label for="address" class="block text-sm font-medium text-gray-700 mb-1">Alamat
-                                Lengkap</label>
-                            <textarea id="address" name="address" rows="3"
-                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                placeholder="Jalan, RT/RW, Kelurahan, Kecamatan" required>{{ old('address') }}</textarea>
-                        </div>
+                        <!-- Address Selection Modal/Dropdown -->
+                        @if ($addresses->count() > 1)
+                            <div id="address-selection" class="hidden mt-4">
+                                <h4 class="font-medium text-gray-900 mb-3">Pilih Alamat Pengiriman:</h4>
+                                <div class="space-y-3 max-h-60 overflow-y-auto">
+                                    @foreach ($addresses as $address)
+                                        <label
+                                            class="flex items-start p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors address-option">
+                                            <input type="radio" name="address_selection" value="{{ $address->id }}"
+                                                class="mt-1 w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                                                {{ $primaryAddress && $primaryAddress->id == $address->id ? 'checked' : '' }}>
+                                            <div class="ml-3 flex-1">
+                                                <div class="flex items-center mb-1">
+                                                    <span
+                                                        class="font-medium text-gray-900">{{ $address->recipient_name }}</span>
+                                                    @if ($address->label)
+                                                        <span
+                                                            class="ml-2 px-2 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded">
+                                                            {{ $address->label }}
+                                                        </span>
+                                                    @endif
+                                                    @if ($address->is_primary)
+                                                        <span
+                                                            class="ml-2 px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded">
+                                                            Utama
+                                                        </span>
+                                                    @endif
+                                                </div>
+                                                <p class="text-sm text-gray-600 mb-1">{{ $address->phone }}</p>
+                                                <p class="text-sm text-gray-600">{{ $address->formatted_address }}</p>
+                                            </div>
+                                            <button type="button"
+                                                onclick="window.location.href='{{ route('profile.edit') }}'"
+                                                class="text-blue-600 hover:text-blue-800 font-medium text-sm">
+                                                Edit
+                                            </button>
+                                        </label>
+                                    @endforeach
+                                </div>
+                                <div class="mt-4 flex space-x-3">
+                                    <button type="button" id="confirm-address-btn"
+                                        class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                                        Konfirmasi Alamat
+                                    </button>
+                                    <button type="button" id="cancel-address-btn"
+                                        class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors">
+                                        Batal
+                                    </button>
+                                </div>
+                            </div>
+                        @endif
 
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
-                            <div>
-                                <label for="city" class="block text-sm font-medium text-gray-700 mb-1">Kota</label>
-                                <input type="text" id="city" name="city" value="{{ old('city') }}"
-                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                    required>
-                            </div>
-                            <div>
-                                <label for="province" class="block text-sm font-medium text-gray-700 mb-1">Provinsi</label>
-                                <input type="text" id="province" name="province" value="{{ old('province') }}"
-                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                    required>
-                            </div>
-                            <div>
-                                <label for="postal_code" class="block text-sm font-medium text-gray-700 mb-1">Kode
-                                    Pos</label>
-                                <input type="text" id="postal_code" name="postal_code" value="{{ old('postal_code') }}"
-                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                    required>
-                            </div>
-                        </div>
                     </form>
                 </div>
 
@@ -151,8 +205,6 @@
                     </div>
                 </div>
 
-                <!-- Payment Info Section -->
-
                 <!-- Notes Section -->
                 <div class="bg-white rounded-lg border border-gray-200 p-6">
                     <h2 class="text-xl font-semibold text-gray-900 mb-4">Catatan Pesanan (Opsional)</h2>
@@ -174,7 +226,8 @@
                                 <img src="{{ $item->product->image ? asset('storage/' . $item->product->image) : 'https://via.placeholder.com/60x60?text=No+Image' }}"
                                     alt="{{ $item->product->name }}" class="w-12 h-12 rounded-lg object-cover">
                                 <div class="flex-1 min-w-0">
-                                    <p class="text-sm font-medium text-gray-900 truncate">{{ $item->product->name }}</p>
+                                    <p class="text-sm font-medium text-gray-900 truncate">{{ $item->product->name }}
+                                    </p>
                                     <p class="text-sm text-gray-600">Qty: {{ $item->quantity }}</p>
                                 </div>
                                 <p class="text-sm font-semibold text-gray-900">
@@ -218,7 +271,7 @@
 
                     <!-- Checkout Button -->
                     <button type="submit" form="checkout-form"
-                        class="w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-blue-700 transition-colors duration-200 flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                        class="cursor-pointer w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-blue-700 transition-colors duration-200 flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
                         id="checkout-btn">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -254,8 +307,72 @@
     <script>
         window.checkoutData = {
             subtotal: {{ $subtotal }},
-            tax: {{ $tax }}
+            tax: {{ $tax }},
+            addresses: {!! json_encode($addresses) !!}
         };
     </script>
     <script src="{{ asset('js/checkout.js') }}"></script>
+    <script>
+        // Address selection functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const changeAddressBtn = document.getElementById('change-address-btn');
+            const addressSelection = document.getElementById('address-selection');
+            const confirmAddressBtn = document.getElementById('confirm-address-btn');
+            const cancelAddressBtn = document.getElementById('cancel-address-btn');
+            const selectedAddressDisplay = document.getElementById('selected-address-display');
+            const selectedAddressId = document.getElementById('selected-address-id');
+
+            // Show address selection
+            if (changeAddressBtn) {
+                changeAddressBtn.addEventListener('click', function() {
+                    addressSelection.classList.remove('hidden');
+                    changeAddressBtn.style.display = 'none';
+                });
+            }
+
+            // Cancel address selection
+            if (cancelAddressBtn) {
+                cancelAddressBtn.addEventListener('click', function() {
+                    addressSelection.classList.add('hidden');
+                    if (changeAddressBtn) changeAddressBtn.style.display = 'block';
+                });
+            }
+
+            // Confirm address selection
+            if (confirmAddressBtn) {
+                confirmAddressBtn.addEventListener('click', function() {
+                    const selectedRadio = document.querySelector('input[name="address_selection"]:checked');
+                    if (selectedRadio) {
+                        const addressId = selectedRadio.value;
+                        const addressData = window.checkoutData.addresses.find(addr => addr.id ==
+                            addressId);
+
+                        if (addressData) {
+                            // Update display
+                            const displayHtml = `
+                                <div class="flex items-start justify-between">
+                                    <div class="flex-1">
+                                        <div class="flex items-center mb-2">
+                                            <h3 class="font-semibold text-gray-900">${addressData.recipient_name}</h3>
+                                            ${addressData.label ? `<span class="ml-2 px-2 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded">${addressData.label}</span>` : ''}
+                                            ${addressData.is_primary ? '<span class="ml-2 px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded">Utama</span>' : ''}
+                                        </div>
+                                        <p class="text-gray-600 mb-1">${addressData.phone}</p>
+                                        <p class="text-gray-600">${addressData.formatted_address}</p>
+                                    </div>
+                                </div>
+                            `;
+
+                            selectedAddressDisplay.innerHTML = displayHtml;
+                            selectedAddressId.value = addressId;
+
+                            // Hide selection and show change button
+                            addressSelection.classList.add('hidden');
+                            if (changeAddressBtn) changeAddressBtn.style.display = 'block';
+                        }
+                    }
+                });
+            }
+        });
+    </script>
 @endsection

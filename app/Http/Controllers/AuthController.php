@@ -86,17 +86,7 @@ class AuthController extends Controller
         return view('auth.forgot-password');
     }
 
-    public function showEditProfile()
-    {
-        $user = Auth::user();
-        $completedOrders = Order::with(['orderItems.product.category', 'orderItems.product.images'])
-            ->where('user_id', Auth::id())
-            ->where('order_status', 'completed') // atau 'selesai' sesuai dengan enum/status yang Anda gunakan
-            ->orderBy('completed_at', 'desc')
-            ->orderBy('created_at', 'desc')
-            ->paginate(10);
-        return view('edit-profile', compact('user', 'completedOrders'));
-    }
+
     /**
      * Get a validator for an incoming registration request.
      */

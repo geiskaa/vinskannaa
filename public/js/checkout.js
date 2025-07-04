@@ -64,6 +64,36 @@ document.addEventListener("DOMContentLoaded", function () {
         const total = subtotal + tax + shippingCost;
         formData.append("total_amount", total);
 
+        // Handle address data - get from selected address
+        const selectedAddressId = document.getElementById(
+            "selected-address-id"
+        );
+        if (selectedAddressId && selectedAddressId.value) {
+            const addressId = selectedAddressId.value;
+            const addressData = window.checkoutData.addresses.find(
+                (addr) => addr.id == addressId
+            );
+
+            if (addressData) {
+                // Remove address_id and add individual address fields
+                formData.delete("address_id");
+                formData.append("name", addressData.recipient_name);
+                formData.append("phone", addressData.phone);
+                formData.append("address", addressData.address);
+                formData.append("city", addressData.city);
+                formData.append("province", addressData.province);
+                formData.append("postal_code", addressData.postal_code);
+            } else {
+                showToast("Alamat tidak ditemukan", "error");
+                resetButton();
+                return;
+            }
+        } else {
+            showToast("Silakan pilih alamat pengiriman", "error");
+            resetButton();
+            return;
+        }
+
         // Submit form dengan proper error handling
         fetch(this.action, {
             method: "POST",

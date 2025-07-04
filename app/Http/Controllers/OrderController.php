@@ -6,6 +6,7 @@ use App\Models\Cart;
 use App\Models\Favorite;
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Models\ProductRating;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -24,6 +25,9 @@ class OrderController extends Controller
         if ($cartItems->isEmpty()) {
             return redirect()->back()->with('error', 'Keranjang belanja Anda kosong.');
         }
+
+        $addresses = $user->addresses()->get();
+        $primaryAddress = $user->addresses()->primary()->first();
         // Hitung subtotal, pajak, dan total
         $subtotal = $cartItems->sum(fn($item) => $item->price * $item->quantity);
         $tax = $subtotal * 0.11; // Pajak 11%
@@ -31,7 +35,7 @@ class OrderController extends Controller
         $total = $subtotal + $tax + $shipping;
 
         // Kirim ke view
-        return view('checkout', compact('user', 'cartItems', 'subtotal', 'tax', 'shipping', 'total'));
+        return view('checkout', compact('user', 'cartItems', 'subtotal', 'tax', 'shipping', 'total', 'addresses', 'primaryAddress'));
 
     }
 
@@ -576,6 +580,7 @@ class OrderController extends Controller
             'order_id' => $order->id,
             'order_status' => $order->order_status,
         ]);
+
         // Cek apakah order sudah selesai
         if ($order->order_status !== 'selesai') {
             Log::warning('User mencoba mengakses form rating sebelum pesanan selesai', [
@@ -583,13 +588,27 @@ class OrderController extends Controller
                 'order_id' => $order->id,
                 'order_status' => $order->order_status,
             ]);
-
             return redirect()->route('pesananSaya')
                 ->with('error', 'Pesanan belum selesai');
         }
 
+        // TAMBAHAN: Cek apakah user sudah pernah memberikan rating untuk order ini
+        $existingRatings = ProductRating::where('user_id', Auth::id())
+            ->where('order_id', $order->id)
+            ->exists();
+
+        if ($existingRatings) {
+            Log::info('User mencoba mengakses form rating yang sudah pernah diberikan', [
+                'user_id' => Auth::id(),
+                'order_id' => $order->id,
+            ]);
+            return redirect()->route('pesananSaya')
+                ->with('info', 'Anda sudah memberikan rating untuk pesanan ini');
+        }
+
         return view('rating-pesanan', compact('order'));
     }
+
 
     /**
      * Store rating for order

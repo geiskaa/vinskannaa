@@ -24,6 +24,9 @@ class User extends Authenticatable
         'google_id',
         'facebook_id',
         'role',
+        'phone',
+        'date_of_birth',
+        'gender',
     ];
 
     /**
@@ -46,6 +49,7 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'date_of_birth' => 'date',
         ];
     }
 
@@ -59,6 +63,18 @@ class User extends Authenticatable
         return $this->hasMany(Cart::class);
     }
 
+    public function addresses()
+    {
+        return $this->hasMany(Address::class);
+    }
+
+    /**
+     * Get primary address
+     */
+    public function primaryAddress()
+    {
+        return $this->hasOne(Address::class)->where('is_primary', true);
+    }
     /**
      * Relasi ke Products melalui Favorites
      */
@@ -97,6 +113,12 @@ class User extends Authenticatable
     public function cartItemsCount()
     {
         return $this->carts()->sum('quantity');
+    }
+
+    public function getPrimaryAddressAttribute()
+    {
+        $address = $this->primaryAddress;
+        return $address ? $address->formatted_address : null;
     }
 
 }
