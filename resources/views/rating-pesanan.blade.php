@@ -99,8 +99,7 @@
                     </a>
                     <button type="submit"
                         class="px-6 py-3 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                        id="submit-btn"
-                        data-total-products="{{ count($order->items) }} disabled>
+                        id="submit-btn" data-total-products="{{ count($order->items) }}" disabled>
                         Kirim Rating
                     </button>
                 </div>
@@ -109,8 +108,6 @@
     </div>
 
     <!-- Toast Container -->
-    <div id="toast-container"
-                        class="fixed top-4 right-4 z-50 space-y-2">
-                </div>
-                <script src="{{ asset('js/rating-pesanan.js') }}"></script>
-            @endsection
+    <div id="toast-container" class="fixed top-4 right-4 z-50 space-y-2"></div>
+
+@endsection

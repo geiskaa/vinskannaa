@@ -177,7 +177,7 @@
                 @auth
                     <div class="flex space-x-4 pt-6">
                         <!-- Add to Cart Button -->
-                        <button onclick="toggleCart({{ $product->id }})"
+                        <button onclick="toggleCart({{ $product->id }}, 'detail')"
                             class="flex-1 bg-gray-900 text-white py-3 px-6 rounded-lg hover:bg-gray-800 transition-colors duration-200 flex items-center justify-center space-x-2 cart-btn disabled:opacity-50 disabled:cursor-not-allowed"
                             data-product-id="{{ $product->id }}" data-in-cart="{{ $product->in_cart ? 'true' : 'false' }}"
                             {{ $product->stock !== null && $product->stock <= 0 ? 'disabled' : '' }}>
@@ -186,15 +186,15 @@
                                     d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13v6a2 2 0 002 2h6a2 2 0 002-2v-6m-8 0V9a2 2 0 012-2h4a2 2 0 012 2v4">
                                 </path>
                             </svg>
-                            <span>{{ $product->in_cart ? 'Hapus dari Keranjang' : 'Tambah ke Keranjang' }}</span>
+                            <span>Tambah ke Keranjang</span>
                         </button>
 
                         <!-- Favorite Button -->
                         <button onclick="toggleFavorite({{ $product->id }})"
-                            class="p-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors duration-200 favorite-btn"
+                            class="p-2 rounded-full bg-white bg-opacity-80 hover:bg-opacity-100 transition-all duration-200 shadow-sm hover:shadow-md favorite-btn transform hover:scale-110"
                             data-product-id="{{ $product->id }}"
                             data-is-favorited="{{ $product->is_favorited ? 'true' : 'false' }}">
-                            <svg class="w-5 h-5 transition-all duration-300 {{ $product->is_favorited ? 'text-red-500 fill-current' : 'text-gray-400' }}"
+                            <svg class="w-5 h-5 transition-all duration-300 {{ $product->is_favorited ? 'text-red-500 fill-current scale-110' : 'text-gray-400' }}"
                                 fill="{{ $product->is_favorited ? 'currentColor' : 'none' }}" stroke="currentColor"
                                 viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -220,5 +220,4 @@
     <!-- Toast Container -->
     <div id="toast-container" class="fixed top-4 right-4 z-50 space-y-2"></div>
 
-    <script src="{{ asset('js/detail-produk.js') }}"></script>
 @endsection

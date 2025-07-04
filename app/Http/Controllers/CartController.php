@@ -30,25 +30,19 @@ class CartController extends Controller
         Log::info('User mengakses toggleCart', [
             'user_id' => $user->id,
             'product_id' => $product->id,
+            'event' => $request->input('event'),
         ]);
 
-        // Cek apakah produk sudah ada di cart
+        $event = $request->input('event'); // 'icon' atau 'detail'
+
         $cartItem = Cart::where('user_id', $user->id)
             ->where('product_id', $product->id)
             ->first();
 
-        if ($cartItem) {
-            $cartItem->delete();
-            Log::info('Produk dihapus dari cart', [
-                'user_id' => $user->id,
-                'product_id' => $product->id,
-            ]);
-
-            $message = 'Produk dihapus dari keranjang';
-            $inCart = false;
-        } else {
+        // Jika event berasal dari halaman detail → tambah atau update quantity
+        if ($event === 'detail') {
             if ($product->stock !== null && $product->stock <= 0) {
-                Log::notice('Produk habis stok saat ingin ditambahkan ke cart', [
+                Log::notice('Produk habis stok saat ingin ditambahkan ke cart (detail)', [
                     'user_id' => $user->id,
                     'product_id' => $product->id,
                 ]);
@@ -59,20 +53,74 @@ class CartController extends Controller
                 ]);
             }
 
-            Cart::create([
-                'user_id' => $user->id,
-                'product_id' => $product->id,
-                'quantity' => 1,
-                'price' => $product->price
-            ]);
+            if ($cartItem) {
+                $cartItem->quantity += 1;
+                $cartItem->save();
 
-            Log::info('Produk ditambahkan ke cart', [
-                'user_id' => $user->id,
-                'product_id' => $product->id,
-            ]);
+                Log::info('Quantity produk ditingkatkan di cart (detail)', [
+                    'user_id' => $user->id,
+                    'product_id' => $product->id,
+                    'new_quantity' => $cartItem->quantity,
+                ]);
 
-            $message = 'Produk ditambahkan ke keranjang';
+                $message = 'Jumlah produk diperbarui di keranjang';
+            } else {
+                Cart::create([
+                    'user_id' => $user->id,
+                    'product_id' => $product->id,
+                    'quantity' => 1,
+                    'price' => $product->price
+                ]);
+
+                Log::info('Produk ditambahkan ke cart (detail)', [
+                    'user_id' => $user->id,
+                    'product_id' => $product->id,
+                ]);
+
+                $message = 'Produk ditambahkan ke keranjang';
+            }
+
             $inCart = true;
+        } else {
+            // Default toggle behavior (misalnya dari icon)
+            if ($cartItem) {
+                $cartItem->delete();
+
+                Log::info('Produk dihapus dari cart (toggle)', [
+                    'user_id' => $user->id,
+                    'product_id' => $product->id,
+                ]);
+
+                $message = 'Produk dihapus dari keranjang';
+                $inCart = false;
+            } else {
+                if ($product->stock !== null && $product->stock <= 0) {
+                    Log::notice('Produk habis stok saat toggle cart', [
+                        'user_id' => $user->id,
+                        'product_id' => $product->id,
+                    ]);
+
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Produk sedang habis stok'
+                    ]);
+                }
+
+                Cart::create([
+                    'user_id' => $user->id,
+                    'product_id' => $product->id,
+                    'quantity' => 1,
+                    'price' => $product->price
+                ]);
+
+                Log::info('Produk ditambahkan ke cart (toggle)', [
+                    'user_id' => $user->id,
+                    'product_id' => $product->id,
+                ]);
+
+                $message = 'Produk ditambahkan ke keranjang';
+                $inCart = true;
+            }
         }
 
         $cartCount = $user->cartItemsCount();
@@ -86,6 +134,7 @@ class CartController extends Controller
     }
 
 
+
     /**
      * Update quantity item di cart
      */
@@ -94,7 +143,6 @@ class CartController extends Controller
         $request->validate([
             'quantity' => 'required|integer|min:1|max:99'
         ]);
-
         // Pastikan cart item milik user yang sedang login
         if ($cart->user_id !== Auth::id()) {
             return response()->json([

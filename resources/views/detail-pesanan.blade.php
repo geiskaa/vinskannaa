@@ -199,7 +199,7 @@
 
                     <div class="flex justify-between">
                         <span class="text-gray-600">Pajak</span>
-                        <span class="text-gray-900">Rp {{ number_format($order->tax, 0, ',', '.') }}</span>
+                        <span class="text-gray-900">Rp {{ number_format($order->tax_cost, 0, ',', '.') }}</span>
                     </div>
 
 
@@ -233,19 +233,35 @@
             <div class="px-6 py-4 border-b border-gray-200">
                 <h3 class="text-lg font-semibold text-gray-900">Informasi Pembayaran</h3>
             </div>
+            @php
+                $paymentTypes = [
+                    'bank_transfer' => 'Transfer Bank',
+                    'credit_card' => 'Kartu Kredit',
+                    'gopay' => 'GoPay',
+                    'qris' => 'QRIS',
+                    'shopeepay' => 'ShopeePay',
+                    'indomaret' => 'Indomaret',
+                    'alfamart' => 'Alfamart',
+                ];
+            @endphp
             <div class="px-6 py-4">
                 <div class="space-y-2">
                     <div class="flex justify-between">
                         <span class="text-gray-600">Metode Pembayaran</span>
-                        <span class="text-gray-900">{{ $order->payment_type ?? 'Belum dipilih' }}</span>
+                        <span class="text-gray-900">
+                            {{ $paymentTypes[$order->payment_type] ?? 'Belum dipilih' }}
+                        </span>
                     </div>
                     @if ($order->paid_at)
                         <div class="flex justify-between">
                             <span class="text-gray-600">Tanggal Pembayaran</span>
-                            <span
-                                class="text-gray-900">{{ \Carbon\Carbon::parse($order->paid_at)->format('d M Y, H:i') }}</span>
+                            <span class="text-gray-900">
+                                {{ \Carbon\Carbon::parse($order->paid_at)->timezone('Asia/Jakarta')->format('d M Y, H:i') }}
+                                WIB
+                            </span>
                         </div>
                     @endif
+
                     <div class="flex justify-between">
                         <span class="text-gray-600">Status Pembayaran</span>
                         <span class="text-gray-900">
@@ -280,7 +296,7 @@
             </a>
 
             <div class="flex space-x-3">
-                @if ($order->order_status == 'menunggu_konfirmasi')
+                @if ($order->order_status === 'menunggu_konfirmasi' && $order->status !== 'paid')
                     <button onclick="cancelOrder('{{ $order->id }}')"
                         class="px-6 py-3 text-sm font-medium text-red-600 bg-white border border-red-300 rounded-md hover:bg-red-50">
                         Batalkan Pesanan
@@ -299,7 +315,5 @@
 
     <!-- Toast Container -->
     <div id="toast-container" class="fixed top-4 right-4 z-50 space-y-2"></div>
-
-    <script src="{{ asset('js/detail-pesanan.js') }}"></script>
 
 @endsection

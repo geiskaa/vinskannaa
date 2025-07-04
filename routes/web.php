@@ -78,3 +78,6 @@ Route::middleware('auth')->group(function () {
 });
 
 Route::get('/products/{slug}', [ProductController::class, 'show'])->name('product.show');
+Route::post('/handle-payment-success', [OrderController::class, 'handlePaymentSuccess']);
+Route::post('/handle-payment-failed', [OrderController::class, 'handlePaymentFailed']);
+Route::put('/pesanan-saya/{id}/update-status', [OrderController::class, 'updateStatus'])->name('orders.update-status');

@@ -93,35 +93,55 @@ document.addEventListener("DOMContentLoaded", function () {
                     window.snap.pay(data.snap_token, {
                         onSuccess: function (result) {
                             console.log("Payment success:", result);
-                            showToast("Pembayaran berhasil!", "success");
-                            setTimeout(() => {
-                                window.location.href =
-                                    "/orders/" + data.order_id;
-                            }, 1500);
+
+                            // Call backend to create order
+                            handlePaymentCallback("/handle-payment-success", {
+                                order_id: result.order_id,
+                                transaction_status: result.transaction_status,
+                                payment_type: result.payment_type,
+                            })
+                                .then(() => {
+                                    showToast(
+                                        "Pembayaran berhasil!",
+                                        "success"
+                                    );
+                                    setTimeout(() => {
+                                        window.location.href = "/pesanan-saya";
+                                    }, 1500);
+                                })
+                                .catch((error) => {
+                                    console.error(
+                                        "Error handling payment success:",
+                                        error
+                                    );
+                                    showToast(
+                                        "Pembayaran berhasil, tapi terjadi kesalahan sistem",
+                                        "warning"
+                                    );
+                                });
                         },
                         onPending: function (result) {
-                            console.log("Payment pending:", result);
-                            showToast(
-                                "Pembayaran pending, silakan selesaikan pembayaran.",
-                                "warning"
+                            // ⛔️ Dianggap batal/gagal
+                            console.log(
+                                "Payment pending (dianggap cancel):",
+                                result
                             );
-                            setTimeout(() => {
-                                window.location.href =
-                                    "/orders/" + data.order_id;
-                            }, 1500);
+                            handleFailedOrClosed(data.order_id, "cancelled");
                         },
+
                         onError: function (result) {
+                            // ❌ Gagal bayar
                             console.log("Payment error:", result);
-                            showToast(
-                                "Pembayaran gagal, silakan coba lagi.",
-                                "error"
+                            handleFailedOrClosed(
+                                result.order_id,
+                                result.transaction_status || "failed"
                             );
-                            resetButton();
                         },
+
                         onClose: function () {
+                            // ❌ Popup ditutup user
                             console.log("Payment popup closed");
-                            showToast("Pembayaran dibatalkan.", "warning");
-                            resetButton();
+                            handleFailedOrClosed(data.order_id, "cancelled");
                         },
                     });
                 } else {
@@ -149,6 +169,55 @@ document.addEventListener("DOMContentLoaded", function () {
             });
     });
 
+    function handleFailedOrClosed(orderId, status) {
+        handlePaymentCallback("/handle-payment-failed", {
+            order_id: orderId,
+            transaction_status: status,
+        })
+            .then(() => {
+                showToast(
+                    "Pembayaran dibatalkan atau belum selesai.",
+                    "warning"
+                );
+                resetButton();
+            })
+            .catch((error) => {
+                console.error("Error handling failed/closed:", error);
+                showToast(
+                    "Terjadi kesalahan saat membatalkan pembayaran",
+                    "error"
+                );
+                resetButton();
+            });
+    }
+
+    // Function to handle payment callbacks
+    function handlePaymentCallback(url, data) {
+        return fetch(url, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-Requested-With": "XMLHttpRequest",
+                "X-CSRF-TOKEN": document
+                    .querySelector('meta[name="csrf-token"]')
+                    .getAttribute("content"),
+            },
+            body: JSON.stringify(data),
+        })
+            .then((response) => {
+                if (!response.ok) {
+                    return response.json().then((err) => Promise.reject(err));
+                }
+                return response.json();
+            })
+            .then((result) => {
+                if (!result.success) {
+                    throw new Error(result.message || "Unknown error");
+                }
+                return result;
+            });
+    }
+
     function resetButton() {
         checkoutBtn.disabled = false;
         checkoutBtn.innerHTML = `
@@ -158,72 +227,4 @@ document.addEventListener("DOMContentLoaded", function () {
             <span>Lanjut ke Pembayaran</span>
         `;
     }
-
-    function showToast(message, type = "success") {
-        const toastContainer = document.getElementById("toast-container");
-        const toast = document.createElement("div");
-        toast.className = `transform transition-all duration-300 ease-in-out translate-x-full opacity-0`;
-
-        let bgColor, icon;
-        switch (type) {
-            case "success":
-                bgColor = "bg-green-500";
-                icon = `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                </svg>`;
-                break;
-            case "warning":
-                bgColor = "bg-yellow-500";
-                icon = `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.464 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
-                </svg>`;
-                break;
-            default:
-                bgColor = "bg-red-500";
-                icon = `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                </svg>`;
-        }
-
-        toast.innerHTML = `
-            <div class="${bgColor} text-white px-4 py-3 rounded-lg shadow-lg flex items-center space-x-3 min-w-64 max-w-sm">
-                <div class="flex-shrink-0">${icon}</div>
-                <div class="flex-1">
-                    <p class="text-sm font-medium">${message}</p>
-                </div>
-                <button onclick="removeToast(this)" class="flex-shrink-0 ml-2 text-white hover:text-gray-200 transition-colors">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                    </svg>
-                </button>
-            </div>
-        `;
-
-        toastContainer.appendChild(toast);
-
-        setTimeout(() => {
-            toast.classList.remove("translate-x-full", "opacity-0");
-            toast.classList.add("translate-x-0", "opacity-100");
-        }, 100);
-
-        setTimeout(() => {
-            removeToast(toast);
-        }, 4000);
-    }
-
-    function removeToast(element) {
-        const toast = element.closest(".transform");
-        if (toast) {
-            toast.classList.remove("translate-x-0", "opacity-100");
-            toast.classList.add("translate-x-full", "opacity-0");
-            setTimeout(() => {
-                if (toast.parentNode) {
-                    toast.parentNode.removeChild(toast);
-                }
-            }, 300);
-        }
-    }
-
-    // Make removeToast globally accessible
-    window.removeToast = removeToast;
 });

@@ -130,7 +130,7 @@
                                         <div
                                             class="flex items-center bg-gradient-to-r from-gray-50 to-white border-2 border-gray-200 rounded-2xl shadow-inner overflow-hidden">
                                             <button
-                                                onclick="updateQuantity({{ $item->id }}, {{ $item->quantity - 1 }})"
+                                                onclick="updateCartQuantity({{ $item->id }}, {{ $item->quantity - 1 }})"
                                                 class="px-4 py-3 text-gray-600 hover:text-white hover:bg-gradient-to-r hover:from-red-500 hover:to-pink-600 transition-all duration-300 {{ $item->quantity <= 1 ? 'opacity-50 cursor-not-allowed' : '' }}"
                                                 {{ $item->quantity <= 1 ? 'disabled' : '' }}>
                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor"
@@ -145,7 +145,7 @@
                                                     class="text-lg font-bold text-gray-800 quantity-display">{{ $item->quantity }}</span>
                                             </div>
                                             <button
-                                                onclick="updateQuantity({{ $item->id }}, {{ $item->quantity + 1 }})"
+                                                onclick="updateCartQuantity({{ $item->id }}, {{ $item->quantity + 1 }})"
                                                 class="px-4 py-3 text-gray-600 hover:text-white hover:bg-gradient-to-r hover:from-green-500 hover:to-blue-600 transition-all duration-300"
                                                 {{ $item->product->stock !== null && $item->quantity >= $item->product->stock ? 'disabled' : '' }}>
                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor"
@@ -157,7 +157,7 @@
                                         </div>
 
                                         <!-- Remove Button -->
-                                        <button onclick="removeItem({{ $item->id }})"
+                                        <button onclick="removeFromCart({{ $item->id }})"
                                             class="group p-3 bg-gradient-to-r from-red-100 to-pink-100 text-red-600 hover:from-red-500 hover:to-pink-600 hover:text-white rounded-2xl transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-110">
                                             <svg class="w-5 h-5 group-hover:rotate-12 transition-transform duration-300"
                                                 fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -325,5 +325,4 @@
     <!-- Enhanced Toast Container -->
     <div id="toast-container" class="fixed top-4 right-4 z-50 space-y-3"></div>
 
-    <script src="{{ asset('js/cart.js') }}"></script>
 @endsection

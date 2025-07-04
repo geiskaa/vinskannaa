@@ -214,7 +214,26 @@ class ProductController extends Controller
             ->with('ratings') // jika ada relasi
             ->firstOrFail();
 
+        // Jika user login, cek apakah produk ini di-favoritkan atau ada di keranjang
+        if (auth('web')->check()) {
+            $user = auth('web')->user();
+
+            // Cek apakah favorit
+            $product->is_favorited = $user->favorites()
+                ->where('product_id', $product->id)
+                ->exists();
+
+            // Cek apakah ada di cart
+            $product->in_cart = $user->carts()
+                ->where('product_id', $product->id)
+                ->exists();
+        } else {
+            $product->is_favorited = false;
+            $product->in_cart = false;
+        }
+
         return view('detail-produk', compact('product'));
     }
+
 
 }

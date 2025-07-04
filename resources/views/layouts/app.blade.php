@@ -20,6 +20,32 @@
 
     @include('components.footer')
     @stack('scripts')
+    <script src="{{ asset('js/utils.js') }}"></script>
+    <script src="{{ asset('js/cart-function.js') }}"></script>
+    <script src="{{ asset('js/favorite-function.js') }}"></script>
+    <script src="{{ asset('js/order-function.js') }}"></script>
+    <script src="{{ asset('js/pagination-function.js') }}"></script>
+    <script src="{{ asset('js/rating-function.js') }}"></script>
+    <script src="{{ asset('js/search-function.js') }}"></script>
+    <script src="{{ asset('js/tab-function.js') }}"></script>
+    <script src="{{ asset('js/animation-function.js') }}"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Auto-initialize berdasarkan halaman
+            @if (request()->routeIs('dashboard'))
+                // Dashboard sudah auto-initialize
+            @elseif (request()->routeIs('favorites'))
+                initializeFavorites();
+            @elseif (request()->routeIs('orders*'))
+                initializeOrderTabs();
+            @elseif (request()->routeIs('carts'))
+                initializeCart();
+            @elseif (request()->routeIs('pesananSaya'))
+                initializeTabs();
+            @endif
+        });
+    </script>
 
 </body>
 

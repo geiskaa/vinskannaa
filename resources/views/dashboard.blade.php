@@ -36,9 +36,6 @@
     <div id="dashboard-meta" data-current-page="{{ $currentPage }}" data-has-more="{{ $hasMore ? 'true' : 'false' }}">
     </div>
 
-
-    <script src="{{ asset('js/dashboard.js') }}"></script>
-
     <style>
         @keyframes bounce {
 

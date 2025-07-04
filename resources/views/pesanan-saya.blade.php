@@ -235,13 +235,43 @@
                                                 </button>
                                             @endif
 
-                                            @if ($order->order_status == 'menunggu_konfirmasi')
+                                            @if ($order->order_status === 'menunggu_konfirmasi' && $order->status !== 'paid')
                                                 <button onclick="cancelOrder('{{ $order->id }}')"
                                                     class="px-4 py-2 text-sm font-medium text-red-600 bg-white border border-red-300 rounded-md hover:bg-red-50">
                                                     Batalkan
                                                 </button>
                                             @endif
+
+                                            @if ($order->order_status === 'dikirim' && $order->status == 'paid')
+                                                <button onclick="completeOrder('{{ $order->id }}')"
+                                                    class="px-4 py-2 text-sm font-medium text-green-600 bg-white border border-green-300 rounded-md hover:bg-green-50">
+                                                    Selesaikan
+                                                </button>
+                                            @endif
                                         </div>
+
+                                        @auth('seller')
+                                            @if ($order->order_status === 'menunggu_konfirmasi')
+                                                <button onclick="confirmOrder('{{ $order->id }}')"
+                                                    class="px-4 py-2 text-sm font-medium text-indigo-600 bg-white border border-indigo-300 rounded-md hover:bg-indigo-50">
+                                                    Konfirmasi
+                                                </button>
+                                            @endif
+
+                                            @if ($order->order_status === 'dikonfirmasi')
+                                                <button onclick="markAsReadyToShip('{{ $order->id }}')"
+                                                    class="px-4 py-2 text-sm font-medium text-orange-600 bg-white border border-orange-300 rounded-md hover:bg-orange-50">
+                                                    Perlu Diproses
+                                                </button>
+                                            @endif
+
+                                            @if ($order->order_status === 'diproses')
+                                                <button disabled
+                                                    class="px-4 py-2 text-sm font-medium text-gray-400 bg-gray-100 border border-gray-300 rounded-md cursor-not-allowed">
+                                                    Perlu Dikirim
+                                                </button>
+                                            @endif
+                                        @endauth
                                     </div>
                                 </div>
                             @endforeach
@@ -315,7 +345,8 @@
                                                         alt="{{ $product->name }}"
                                                         class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
                                                 @else
-                                                    <div class="w-full h-full flex items-center justify-center bg-gray-300">
+                                                    <div
+                                                        class="w-full h-full flex items-center justify-center bg-gray-300">
                                                         <svg class="w-16 h-16 text-gray-400" fill="none"
                                                             stroke="currentColor" viewBox="0 0 24 24">
                                                             <path stroke-linecap="round" stroke-linejoin="round"
@@ -409,6 +440,96 @@
 
     <!-- Toast Container -->
     <div id="toast-container" class="fixed top-4 right-4 z-50 space-y-2"></div>
+    <script>
+        function confirmOrder(orderId) {
+            if (confirm('Apakah Anda yakin ingin mengkonfirmasi pesanan ini?')) {
+                updateOrderStatus(orderId, 'dikonfirmasi');
+            }
+        }
 
-    <script src="{{ asset('js/pesanan-saya.js') }}"></script>
+        // Fungsi untuk menandai pesanan perlu diproses (untuk seller)
+        function markAsReadyToShip(orderId) {
+            if (confirm('Apakah Anda yakin pesanan ini sudah siap untuk diproses?')) {
+                updateOrderStatus(orderId, 'diproses');
+            }
+        }
+
+        // Fungsi untuk menandai pesanan sudah dikirim (untuk seller)
+        function markAsShipped(orderId) {
+            if (confirm('Apakah Anda yakin pesanan ini sudah dikirim?')) {
+                updateOrderStatus(orderId, 'dikirim');
+            }
+        }
+
+        // Fungsi untuk menyelesaikan pesanan (untuk customer)
+        function completeOrder(orderId) {
+            if (confirm('Apakah Anda yakin ingin menyelesaikan pesanan ini?')) {
+                updateOrderStatus(orderId, 'selesai');
+            }
+        }
+
+        // Fungsi untuk membatalkan pesanan
+        function cancelOrder(orderId) {
+            const reason = prompt('Alasan pembatalan (opsional):');
+            if (confirm('Apakah Anda yakin ingin membatalkan pesanan ini?')) {
+                updateOrderStatus(orderId, 'dibatalkan', reason);
+            }
+        }
+
+        // Fungsi utama untuk update status
+        function updateOrderStatus(orderId, newStatus, cancelReason = null) {
+            // Tampilkan loading
+            const button = event.target;
+            const originalText = button.textContent;
+            button.textContent = 'Memproses...';
+            button.disabled = true;
+
+            // Siapkan data untuk dikirim
+            const data = {
+                status: newStatus,
+                _token: document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            };
+
+            // Tambahkan alasan pembatalan jika ada
+            if (cancelReason) {
+                data.cancel_reason = cancelReason;
+            }
+
+            fetch(`/pesanan-saya/${orderId}/update-status`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    },
+                    body: JSON.stringify(data)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Tampilkan pesan sukses
+                        showToast(data.message, 'success');
+
+                        // Refresh halaman setelah 1 detik
+                        setTimeout(() => {
+                            location.reload();
+                        }, 1000);
+                    } else {
+                        // Tampilkan pesan error
+                        showToast(data.message, 'error');
+
+                        // Kembalikan button ke kondisi semula
+                        button.textContent = originalText;
+                        button.disabled = false;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showToast('Terjadi kesalahan saat memperbarui status', 'error');
+
+                    // Kembalikan button ke kondisi semula
+                    button.textContent = originalText;
+                    button.disabled = false;
+                });
+        }
+    </script>
 @endsection
