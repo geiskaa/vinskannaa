@@ -34,7 +34,7 @@
         document.addEventListener('DOMContentLoaded', function() {
             // Auto-initialize berdasarkan halaman
             @if (request()->routeIs('dashboard'))
-                // Dashboard sudah auto-initialize
+                initializeSearch()
             @elseif (request()->routeIs('favorites'))
                 initializeFavorites();
             @elseif (request()->routeIs('orders*'))

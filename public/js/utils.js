@@ -73,7 +73,21 @@ function showToast(message, type = "success") {
         removeToast(toast);
     }, 4000);
 }
+function changeMainImage(imageSrc, thumbnailElement) {
+    const mainImage = document.getElementById("main-image");
+    if (mainImage) {
+        mainImage.src = imageSrc;
+    }
 
+    // Update thumbnail borders
+    document.querySelectorAll(".thumbnail-image").forEach((thumb) => {
+        thumb.classList.remove("border-gray-400");
+        thumb.classList.add("border-transparent");
+    });
+
+    thumbnailElement.classList.remove("border-transparent");
+    thumbnailElement.classList.add("border-gray-400");
+}
 function removeToast(element) {
     const toast = element.closest(".transform");
     if (toast) {
@@ -269,6 +283,7 @@ function debounce(func, wait) {
 
 // Make functions available globally
 window.showToast = showToast;
+window.changeMainImage = changeMainImage;
 window.removeToast = removeToast;
 window.getCsrfToken = getCsrfToken;
 window.fetchWithErrorHandling = fetchWithErrorHandling;

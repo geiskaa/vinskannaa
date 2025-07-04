@@ -69,24 +69,32 @@
             </div>
 
             <!-- Tengah: Search Bar -->
-            <div class="flex-1 max-w-lg mx-8 hidden md:block">
-                <div class="relative">
-                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                        </svg>
-                    </div>
-                    <input type="text" placeholder="Cari produk favorit Anda..."
-                        class="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 text-sm placeholder-gray-500">
-                    <div class="absolute inset-y-0 right-0 pr-3 flex items-center">
-                        <kbd
-                            class="hidden sm:inline-block px-2 py-1 text-xs font-medium text-gray-500 bg-white border border-gray-200 rounded">
-                            ⌘K
-                        </kbd>
+            @if (request()->routeIs('dashboard'))
+                <div class="flex-1 max-w-lg mx-8 hidden md:block">
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                            </svg>
+                        </div>
+                        <input type="text" placeholder="Cari produk favorit Anda..."
+                            class="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 text-sm placeholder-gray-500">
+                        <div class="absolute inset-y-0 right-0 pr-3 flex items-center space-x-2">
+                            <kbd
+                                class="shortcut-icon hidden sm:inline-block px-2 py-1 text-xs font-medium text-gray-500 bg-white border border-gray-200 rounded">
+                                ⌘K
+                            </kbd>
+                            <svg class="clear-icon hidden w-4 h-4 text-gray-500 cursor-pointer hover:text-red-500"
+                                xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </div>
                     </div>
                 </div>
-            </div>
+            @endif
 
             <!-- Kanan: Actions & Profile -->
             <div class="flex items-center space-x-3">
@@ -131,7 +139,8 @@
                             </path>
                         </svg>
                     </button>
-                    <div x-show="open" @click.away="open = false" x-transition:enter="transition ease-out duration-200"
+                    <div x-show="open" @click.away="open = false"
+                        x-transition:enter="transition ease-out duration-200"
                         x-transition:enter-start="opacity-0 scale-95 transform -translate-y-2"
                         x-transition:enter-end="opacity-100 scale-100 transform translate-y-0"
                         x-transition:leave="transition ease-in duration-150"

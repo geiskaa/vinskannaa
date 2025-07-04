@@ -17,9 +17,9 @@
 
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
             <!-- Left Column - Product Images -->
-            <div class="space-y-4">
+            <div class="flex gap-4">
                 <!-- Main Image -->
-                <div class="aspect-square bg-gray-100 rounded-lg overflow-hidden">
+                <div class="flex-1 aspect-square bg-gray-100 rounded-lg overflow-hidden">
                     @if ($product->image && (Str::startsWith($product->image, 'http') || Storage::disk('public')->exists($product->image)))
                         <img id="main-image"
                             src="{{ Str::startsWith($product->image, 'http') ? $product->image : asset('storage/' . $product->image) }}"
@@ -54,9 +54,9 @@
                     @endif
                 </div>
 
-                <!-- Thumbnail Images -->
+                <!-- Thumbnail Images - Vertical -->
                 @if ($product->images && is_array($product->images) && count($product->images) > 1)
-                    <div class="flex space-x-2 overflow-x-auto">
+                    <div class="flex flex-col space-y-2 overflow-y-auto max-h-96">
                         @foreach ($product->images as $index => $image)
                             @php
                                 $isExternal = Str::startsWith($image, 'http');
@@ -72,23 +72,6 @@
                         @endforeach
                     </div>
                 @endif
-
-                <!-- Navigation Buttons -->
-                <div class="flex space-x-4">
-                    <button onclick="history.back()" class="flex items-center space-x-2 text-gray-600 hover:text-gray-900">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7">
-                            </path>
-                        </svg>
-                        <span>Kembali</span>
-                    </button>
-                    <button class="flex items-center space-x-2 text-gray-600 hover:text-gray-900">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                        </svg>
-                        <span>Selanjutnya</span>
-                    </button>
-                </div>
             </div>
 
             <!-- Right Column - Product Information -->

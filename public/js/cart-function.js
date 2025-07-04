@@ -130,18 +130,46 @@ function removeFromCart(productId) {
 }
 
 // Update cart quantity
-function updateCartQuantity(productId, quantity) {
-    if (quantity <= 0) {
-        removeFromCart(productId);
+function updateCartQuantity(cartId, newQuantity) {
+    if (newQuantity <= 0) {
+        removeFromCart(cartId);
         return;
     }
 
-    const payload = {
-        quantity: quantity,
-    };
+    // Get cart item elements
+    const cartItem = document.querySelector(`[data-cart-id="${cartId}"]`);
+    if (!cartItem) return;
 
-    fetchWithErrorHandling(`/cart/${productId}/quantity`, {
-        method: "PATCH", // atau POST/DELETE
+    const quantityDisplay = cartItem.querySelector(".quantity-display");
+    const subtotalElement = cartItem.querySelector(".item-subtotal");
+    const minusButton = cartItem.querySelector(
+        'button[onclick*="' + (newQuantity - 1) + '"]'
+    );
+    const plusButton = cartItem.querySelector(
+        'button[onclick*="' + (newQuantity + 1) + '"]'
+    );
+
+    // Store original values for rollback if needed
+    const originalQuantity = parseInt(quantityDisplay.textContent);
+    const pricePerItem = parseInt(cartItem.dataset.price) || 0;
+    const originalSubtotal = subtotalElement.textContent;
+
+    // Update UI instantly (optimistic update)
+    updateCartItemUI(cartItem, newQuantity, pricePerItem);
+
+    // Disable buttons temporarily
+    const allButtons = cartItem.querySelectorAll("button");
+    allButtons.forEach((btn) => {
+        btn.disabled = true;
+        btn.classList.add("opacity-50", "cursor-not-allowed");
+    });
+
+    // Add loading animation
+    quantityDisplay.classList.add("animate-pulse");
+
+    // Send request to server
+    fetchWithErrorHandling(`/cart/${cartId}/quantity`, {
+        method: "PATCH",
         headers: {
             "Content-Type": "application/json",
             "X-CSRF-TOKEN": document
@@ -149,27 +177,33 @@ function updateCartQuantity(productId, quantity) {
                 .getAttribute("content"),
             "X-Requested-With": "XMLHttpRequest",
         },
-        body: JSON.stringify(payload),
+        body: JSON.stringify({
+            quantity: newQuantity,
+        }),
     })
         .then((data) => {
             if (data.success) {
-                showToast("Kuantitas berhasil diperbarui", "success");
+                // Update global cart counter
                 updateCartCounter(data.cart_count);
 
-                // Update cart item subtotal if exists
-                const cartItem = document.querySelector(
-                    `[data-cart-item="${productId}"]`
-                );
-                if (cartItem) {
-                    const subtotalElement =
-                        cartItem.querySelector(".cart-subtotal");
-                    if (subtotalElement) {
-                        subtotalElement.textContent = formatCurrency(
-                            data.subtotal
-                        );
-                    }
-                }
+                // Update order summary
+                updateOrderSummary();
+
+                // Show success toast
+                showToast("Kuantitas berhasil diperbarui", "success");
+
+                // Update button onclick handlers with new quantity
+                updateButtonHandlers(cartItem, cartId, newQuantity);
+
+                // Add success animation
+                addSuccessAnimation(quantityDisplay);
             } else {
+                // Rollback UI changes
+                rollbackCartItemUI(
+                    cartItem,
+                    originalQuantity,
+                    originalSubtotal
+                );
                 showToast(
                     data.message || "Gagal memperbarui kuantitas",
                     "error"
@@ -178,8 +212,155 @@ function updateCartQuantity(productId, quantity) {
         })
         .catch((error) => {
             console.error("Error:", error);
+            // Rollback UI changes
+            rollbackCartItemUI(cartItem, originalQuantity, originalSubtotal);
             showToast("Terjadi kesalahan jaringan", "error");
+        })
+        .finally(() => {
+            // Re-enable buttons
+            allButtons.forEach((btn) => {
+                btn.disabled = false;
+                btn.classList.remove("opacity-50", "cursor-not-allowed");
+            });
+
+            // Remove loading animation
+            quantityDisplay.classList.remove("animate-pulse");
         });
+}
+
+// Update cart item UI elements
+function updateCartItemUI(cartItem, quantity, pricePerItem) {
+    const quantityDisplay = cartItem.querySelector(".quantity-display");
+    const subtotalElement = cartItem.querySelector(".item-subtotal");
+
+    // Update quantity display
+    quantityDisplay.textContent = quantity;
+
+    // Update subtotal
+    const newSubtotal = quantity * pricePerItem;
+    subtotalElement.textContent = formatCurrency(newSubtotal);
+
+    // Update button states
+    const minusButton = cartItem.querySelector(
+        'button[onclick*="' + (quantity - 1) + '"]'
+    );
+    const plusButton = cartItem.querySelector(
+        'button[onclick*="' + (quantity + 1) + '"]'
+    );
+
+    // Update minus button state
+    if (quantity <= 1) {
+        if (minusButton) {
+            minusButton.classList.add("opacity-50", "cursor-not-allowed");
+            minusButton.disabled = true;
+        }
+    } else {
+        if (minusButton) {
+            minusButton.classList.remove("opacity-50", "cursor-not-allowed");
+            minusButton.disabled = false;
+        }
+    }
+
+    // Check stock for plus button
+    const maxStock = parseInt(cartItem.dataset.maxStock) || 999;
+    if (quantity >= maxStock) {
+        if (plusButton) {
+            plusButton.classList.add("opacity-50", "cursor-not-allowed");
+            plusButton.disabled = true;
+        }
+    } else {
+        if (plusButton) {
+            plusButton.classList.remove("opacity-50", "cursor-not-allowed");
+            plusButton.disabled = false;
+        }
+    }
+}
+
+// Rollback UI changes if server request fails
+function rollbackCartItemUI(cartItem, originalQuantity, originalSubtotal) {
+    const quantityDisplay = cartItem.querySelector(".quantity-display");
+    const subtotalElement = cartItem.querySelector(".item-subtotal");
+
+    quantityDisplay.textContent = originalQuantity;
+    subtotalElement.textContent = originalSubtotal;
+
+    // Add error animation
+    addErrorAnimation(quantityDisplay);
+}
+
+// Update button onclick handlers with new quantity values
+function updateButtonHandlers(cartItem, cartId, currentQuantity) {
+    const minusButton = cartItem.querySelector(
+        'button[onclick*="updateCartQuantity"]'
+    );
+    const plusButton = cartItem.querySelectorAll(
+        'button[onclick*="updateCartQuantity"]'
+    )[1];
+
+    if (minusButton) {
+        minusButton.setAttribute(
+            "onclick",
+            `updateCartQuantity(${cartId}, ${currentQuantity - 1})`
+        );
+    }
+
+    if (plusButton) {
+        plusButton.setAttribute(
+            "onclick",
+            `updateCartQuantity(${cartId}, ${currentQuantity + 1})`
+        );
+    }
+}
+
+// Update order summary in real-time
+function updateOrderSummary() {
+    const cartItems = document.querySelectorAll(".cart-item");
+    let totalItems = 0;
+    let totalPrice = 0;
+
+    cartItems.forEach((item) => {
+        const quantity = parseInt(
+            item.querySelector(".quantity-display").textContent
+        );
+        const price = parseInt(item.dataset.price) || 0;
+
+        totalItems += quantity;
+        totalPrice += quantity * price;
+    });
+
+    // Update total items
+    const totalItemsElements = document.querySelectorAll(".total-items");
+    totalItemsElements.forEach((element) => {
+        element.textContent = `${totalItems} item${
+            totalItems !== 1 ? "s" : ""
+        }`;
+    });
+
+    // Update total price
+    const totalPriceElements = document.querySelectorAll(".total-price");
+    totalPriceElements.forEach((element) => {
+        element.textContent = formatCurrency(totalPrice);
+    });
+}
+
+// Animation helpers
+function addSuccessAnimation(element) {
+    element.classList.add("animate-bounce");
+    setTimeout(() => {
+        element.classList.remove("animate-bounce");
+    }, 1000);
+}
+
+function addErrorAnimation(element) {
+    element.classList.add("animate-shake");
+    setTimeout(() => {
+        element.classList.remove("animate-shake");
+    }, 500);
+}
+
+// Utility function to format currency
+function formatCurrency(amount) {
+    return `Rp ${new Intl.NumberFormat("id-ID").format(amount)}`;
 }
 
 // Update cart counter in navbar
@@ -199,6 +380,15 @@ function updateCartCounter(count) {
 // Clear entire cart
 function clearCart() {
     confirmAction("Kosongkan semua produk dari keranjang?", () => {
+        const cartItems = document.querySelectorAll(".cart-item");
+
+        // Add clearing animation to all items
+        cartItems.forEach((item, index) => {
+            setTimeout(() => {
+                item.classList.add("animate-pulse", "opacity-50");
+            }, index * 100);
+        });
+
         fetchWithErrorHandling("/cart", {
             method: "DELETE",
         })
@@ -207,14 +397,23 @@ function clearCart() {
                     showToast("Keranjang berhasil dikosongkan", "success");
                     updateCartCounter(0);
 
-                    // Clear cart items from DOM
-                    const cartItems =
-                        document.querySelectorAll("[data-cart-item]");
-                    cartItems.forEach((item) => item.remove());
+                    // Animate all items out
+                    cartItems.forEach((item, index) => {
+                        setTimeout(() => {
+                            item.style.transform = "translateY(-20px)";
+                            item.style.opacity = "0";
+                            item.style.transition = "all 0.3s ease-out";
+                        }, index * 50);
+                    });
+
                     setTimeout(() => {
                         location.reload();
                     }, 1000);
                 } else {
+                    // Remove animations if failed
+                    cartItems.forEach((item) => {
+                        item.classList.remove("animate-pulse", "opacity-50");
+                    });
                     showToast(
                         data.message || "Gagal mengosongkan keranjang",
                         "error"
@@ -223,6 +422,9 @@ function clearCart() {
             })
             .catch((error) => {
                 console.error("Error:", error);
+                cartItems.forEach((item) => {
+                    item.classList.remove("animate-pulse", "opacity-50");
+                });
                 showToast("Terjadi kesalahan jaringan", "error");
             });
     });

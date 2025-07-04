@@ -6,6 +6,7 @@ let searchTimeout;
 let currentSearchQuery = "";
 
 function initializeSearch() {
+    console.log("Initializing search functionality...");
     // Initialize both desktop and mobile search inputs
     const desktopSearchInput = document.querySelector(
         '.max-w-lg input[type="text"]'
@@ -27,21 +28,47 @@ function initializeSearch() {
 }
 
 function setupSearchInput(input) {
-    // Add search event listeners
-    input.addEventListener("input", handleSearchInput);
-    input.addEventListener("keydown", handleSearchKeydown);
-
-    // Add search icon click functionality
+    // Ambil elemen container
     const searchContainer = input.closest(".relative");
-    if (searchContainer) {
-        const searchIcon = searchContainer.querySelector("svg");
-        if (searchIcon) {
-            searchIcon.style.cursor = "pointer";
-            searchIcon.addEventListener("click", () =>
-                performSearch(input.value)
-            );
+    if (!searchContainer) return;
+
+    // Ambil elemen ikon
+    const shortcutIcon = searchContainer.querySelector(".shortcut-icon");
+    const clearIcon = searchContainer.querySelector(".clear-icon");
+    const searchIcon = searchContainer.querySelector(".search-icon");
+
+    function updateIcons() {
+        if (input.value.trim() !== "") {
+            shortcutIcon?.classList.add("hidden");
+            clearIcon?.classList.remove("hidden");
+        } else {
+            shortcutIcon?.classList.remove("hidden");
+            clearIcon?.classList.add("hidden");
         }
     }
+
+    // Event input: update ikon dan jalankan pencarian
+    input.addEventListener("input", () => {
+        updateIcons();
+        handleSearchInput({ target: input });
+    });
+
+    // Event keyboard: enter/escape
+    input.addEventListener("keydown", handleSearchKeydown);
+
+    // Klik ikon "X" (clear)
+    clearIcon?.addEventListener("click", () => {
+        clearSearch();
+        updateIcons();
+    });
+
+    // Klik ikon search manual
+    searchIcon?.addEventListener("click", () => {
+        performSearch(input.value);
+    });
+
+    // Set state awal
+    updateIcons();
 }
 
 function handleSearchInput(event) {
@@ -249,7 +276,6 @@ function initializeSearchHotkey() {
         }
     });
 }
-
 function clearSearch() {
     currentSearchQuery = "";
 
@@ -264,8 +290,17 @@ function clearSearch() {
         }
     });
 
+    // Hapus parameter search dari URL
+    const url = new URL(window.location.href);
+    url.searchParams.delete("search");
+    url.searchParams.delete("page"); // opsional, reset halaman juga
+
+    // Ganti URL tanpa reload
+    window.history.replaceState({}, document.title, url.pathname + url.search);
+
     // Perform empty search to reset results
     performSearch("");
+    window.location.reload();
 }
 
 function getSearchQuery() {

@@ -43,7 +43,9 @@
                     <div class="lg:col-span-2 space-y-6">
                         @foreach ($cartItems as $item)
                             <div class="group bg-white/70 backdrop-blur-sm rounded-2xl shadow-lg border border-white/50 p-6 cart-item hover:shadow-2xl transition-all duration-500 hover:scale-[1.02] hover:bg-white/80"
-                                data-cart-id="{{ $item->id }}">
+                                data-cart-id="{{ $item->id }}" data-price="{{ $item->price }}"
+                                data-max-stock="{{ $item->product->stock ?? 999 }}">
+
                                 <div class="flex items-center space-x-6">
                                     <!-- Product Image -->
                                     <div
@@ -88,6 +90,8 @@
                                                 </svg>
                                             </div>
                                         @endif
+
+                                        <!-- Loading overlay -->
                                         <div
                                             class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500">
                                         </div>
@@ -99,17 +103,20 @@
                                             class="text-xl font-bold text-gray-900 truncate group-hover:text-blue-600 transition-colors duration-300">
                                             {{ $item->product->name }}
                                         </h3>
+
                                         @if ($item->product->category)
                                             <div
                                                 class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gradient-to-r from-blue-100 to-purple-100 text-blue-800 border border-blue-200">
                                                 {{ Str::title($item->product->category) }}
                                             </div>
                                         @endif
+
                                         <div class="flex items-center space-x-4">
                                             <p
                                                 class="text-2xl font-bold bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
                                                 Rp {{ number_format($item->price, 0, ',', '.') }}
                                             </p>
+
                                             @if ($item->product->stock !== null)
                                                 <div class="flex items-center space-x-1">
                                                     <div
@@ -125,29 +132,36 @@
                                         </div>
                                     </div>
 
-                                    <!-- Quantity Controls -->
+                                    <!-- Enhanced Quantity Controls -->
                                     <div class="flex items-center space-x-4">
                                         <div
                                             class="flex items-center bg-gradient-to-r from-gray-50 to-white border-2 border-gray-200 rounded-2xl shadow-inner overflow-hidden">
+                                            <!-- Minus Button -->
                                             <button
                                                 onclick="updateCartQuantity({{ $item->id }}, {{ $item->quantity - 1 }})"
-                                                class="px-4 py-3 text-gray-600 hover:text-white hover:bg-gradient-to-r hover:from-red-500 hover:to-pink-600 transition-all duration-300 {{ $item->quantity <= 1 ? 'opacity-50 cursor-not-allowed' : '' }}"
-                                                {{ $item->quantity <= 1 ? 'disabled' : '' }}>
+                                                class="quantity-btn px-4 py-3 text-gray-600 hover:text-white hover:bg-gradient-to-r hover:from-red-500 hover:to-pink-600 transition-all duration-300 {{ $item->quantity <= 1 ? 'opacity-50 cursor-not-allowed' : '' }} focus:outline-none focus:ring-2 focus:ring-red-300"
+                                                {{ $item->quantity <= 1 ? 'disabled' : '' }} title="Kurangi jumlah"
+                                                data-action="decrease">
                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor"
                                                     viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                         d="M20 12H4"></path>
                                                 </svg>
                                             </button>
+
+                                            <!-- Quantity Display -->
                                             <div
-                                                class="px-6 py-3 bg-gradient-to-r from-blue-50 to-purple-50 border-x-2 border-gray-200">
+                                                class="px-6 py-3 bg-gradient-to-r from-blue-50 to-purple-50 border-x-2 border-gray-200 min-w-[60px] text-center">
                                                 <span
                                                     class="text-lg font-bold text-gray-800 quantity-display">{{ $item->quantity }}</span>
                                             </div>
+
+                                            <!-- Plus Button -->
                                             <button
                                                 onclick="updateCartQuantity({{ $item->id }}, {{ $item->quantity + 1 }})"
-                                                class="px-4 py-3 text-gray-600 hover:text-white hover:bg-gradient-to-r hover:from-green-500 hover:to-blue-600 transition-all duration-300"
-                                                {{ $item->product->stock !== null && $item->quantity >= $item->product->stock ? 'disabled' : '' }}>
+                                                class="quantity-btn px-4 py-3 text-gray-600 hover:text-white hover:bg-gradient-to-r hover:from-green-500 hover:to-blue-600 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-green-300 {{ $item->product->stock !== null && $item->quantity >= $item->product->stock ? 'opacity-50 cursor-not-allowed' : '' }}"
+                                                {{ $item->product->stock !== null && $item->quantity >= $item->product->stock ? 'disabled' : '' }}
+                                                title="Tambah jumlah" data-action="increase">
                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor"
                                                     viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -156,9 +170,10 @@
                                             </button>
                                         </div>
 
-                                        <!-- Remove Button -->
+                                        <!-- Enhanced Remove Button -->
                                         <button onclick="removeFromCart({{ $item->id }})"
-                                            class="group p-3 bg-gradient-to-r from-red-100 to-pink-100 text-red-600 hover:from-red-500 hover:to-pink-600 hover:text-white rounded-2xl transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-110">
+                                            class="group p-3 bg-gradient-to-r from-red-100 to-pink-100 text-red-600 hover:from-red-500 hover:to-pink-600 hover:text-white rounded-2xl transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-red-300"
+                                            title="Hapus dari keranjang">
                                             <svg class="w-5 h-5 group-hover:rotate-12 transition-transform duration-300"
                                                 fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -169,7 +184,7 @@
                                     </div>
                                 </div>
 
-                                <!-- Subtotal -->
+                                <!-- Enhanced Subtotal -->
                                 <div class="mt-6 pt-4 border-t border-gray-200">
                                     <div class="flex justify-between items-center">
                                         <span class="text-gray-600 font-medium">Subtotal</span>
@@ -179,8 +194,17 @@
                                         </span>
                                     </div>
                                 </div>
+
+                                <!-- Progress indicator for quantity changes -->
+                                <div
+                                    class="mt-2 h-1 bg-gray-200 rounded-full overflow-hidden opacity-0 transition-opacity duration-300 quantity-progress">
+                                    <div
+                                        class="h-full bg-gradient-to-r from-blue-500 to-purple-600 rounded-full transform -translate-x-full transition-transform duration-300">
+                                    </div>
+                                </div>
                             </div>
                         @endforeach
+
                     </div>
 
                     <!-- Order Summary -->
@@ -223,17 +247,18 @@
                             <div class="border-t-2 border-dashed border-gray-300 pt-6">
                                 <div
                                     class="flex justify-between items-center p-6 bg-gradient-to-r from-purple-100 to-blue-100 rounded-2xl">
-                                    <span class="text-xl font-bold text-gray-900">Total Pembayaran</span>
+                                    <span class="text-lg font-bold text-gray-900">Total Pembayaran</span>
                                     <span
-                                        class="text-3xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent total-price">
+                                        class="text-xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent total-price">
                                         Rp
                                         {{ number_format($cartItems->sum(function ($item) {return $item->quantity * $item->price;}),0,',','.') }}
                                     </span>
                                 </div>
                             </div>
 
+                            <!-- Enhanced Checkout Button -->
                             <button
-                                class="group w-full bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 text-white py-4 px-6 rounded-2xl hover:from-blue-700 hover:via-purple-700 hover:to-indigo-700 transition-all duration-300 font-bold text-lg shadow-2xl hover:shadow-purple-500/25 transform hover:scale-105 relative overflow-hidden">
+                                class="group w-full bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 text-white py-4 px-6 rounded-2xl hover:from-blue-700 hover:via-purple-700 hover:to-indigo-700 transition-all duration-300 font-bold text-lg shadow-2xl hover:shadow-purple-500/25 transform hover:scale-105 relative overflow-hidden focus:outline-none focus:ring-2 focus:ring-purple-300">
                                 <span class="relative z-10 flex items-center justify-center space-x-2">
                                     <svg class="w-6 h-6 group-hover:rotate-12 transition-transform duration-300"
                                         fill="none" stroke="currentColor" viewBox="0 0 24 24">

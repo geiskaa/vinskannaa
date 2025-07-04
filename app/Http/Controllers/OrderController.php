@@ -21,6 +21,9 @@ class OrderController extends Controller
         // Ambil item keranjang beserta relasi produk
         $cartItems = $user->carts()->with('product')->get();
 
+        if ($cartItems->isEmpty()) {
+            return redirect()->back()->with('error', 'Keranjang belanja Anda kosong.');
+        }
         // Hitung subtotal, pajak, dan total
         $subtotal = $cartItems->sum(fn($item) => $item->price * $item->quantity);
         $tax = $subtotal * 0.11; // Pajak 11%
