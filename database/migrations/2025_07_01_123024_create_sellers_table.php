@@ -16,6 +16,7 @@ return new class extends Migration {
             $table->string('owner_name');
             $table->string('email')->unique();
             $table->string('phone_number');
+            $table->string('password')->required(); // Password untuk seller, bisa di-hash saat pendaftaran
             $table->text('address')->nullable();
             $table->string('city')->nullable();
             $table->string('province')->nullable();
