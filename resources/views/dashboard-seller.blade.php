@@ -398,6 +398,21 @@
             });
         }
 
+        // Get default period for filter
+        function getDefaultPeriod(filter) {
+            const now = new Date();
+            switch (filter) {
+                case 'weekly':
+                    return now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0');
+                case 'monthly':
+                    return now.getFullYear().toString();
+                case 'yearly':
+                    return now.getFullYear().toString();
+                default:
+                    return now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0');
+            }
+        }
+
         // Change filter function
         function changeFilter(filter) {
             if (filter === currentFilter) return;
@@ -415,13 +430,7 @@
             });
 
             // Set default period based on filter
-            if (filter === 'weekly') {
-                currentPeriod = new Date().getFullYear() + '-' + String(new Date().getMonth() + 1).padStart(2, '0');
-            } else if (filter === 'monthly') {
-                currentPeriod = new Date().getFullYear() + '-' + String(new Date().getMonth() + 1).padStart(2, '0');
-            } else if (filter === 'yearly') {
-                currentPeriod = new Date().getFullYear().toString();
-            }
+            currentPeriod = getDefaultPeriod(filter);
 
             // Reload data
             loadChartData();
@@ -429,8 +438,6 @@
 
         // Navigate period function
         function navigatePeriod(direction) {
-            const current = new Date();
-
             if (currentFilter === 'weekly') {
                 const [year, month] = currentPeriod.split('-');
                 const date = new Date(year, month - 1, 1);
@@ -443,16 +450,16 @@
 
                 currentPeriod = date.getFullYear() + '-' + String(date.getMonth() + 1).padStart(2, '0');
             } else if (currentFilter === 'monthly') {
-                const [year, month] = currentPeriod.split('-');
-                const date = new Date(year, month - 1, 1);
+                // Updated: Navigate by year for monthly view
+                let year = parseInt(currentPeriod);
 
                 if (direction === 'previous') {
-                    date.setFullYear(date.getFullYear() - 1);
+                    year -= 1;
                 } else {
-                    date.setFullYear(date.getFullYear() + 1);
+                    year += 1;
                 }
 
-                currentPeriod = date.getFullYear() + '-' + String(date.getMonth() + 1).padStart(2, '0');
+                currentPeriod = year.toString();
             } else if (currentFilter === 'yearly') {
                 let year = parseInt(currentPeriod);
 

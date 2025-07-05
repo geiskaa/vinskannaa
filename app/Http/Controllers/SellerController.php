@@ -26,7 +26,9 @@ class SellerController extends Controller
 
         $sellerId = Auth::guard('seller')->id();
         $filter = $request->get('filter', 'monthly');
-        $period = $request->get('period', now()->format('Y-m'));
+
+        // Updated default period handling
+        $period = $request->get('period', $this->getDefaultPeriod($filter));
 
         // Generate chart data
         $chartData = $this->generateChartData($sellerId, $filter, $period);
@@ -41,7 +43,6 @@ class SellerController extends Controller
             'period' => $period
         ]);
     }
-
     /**
      * Display a listing of the resource.
      */
@@ -64,9 +65,9 @@ class SellerController extends Controller
         $sellerId = Auth::guard('seller')->id();
         $productsCount = Product::where('seller_id', $sellerId)->count();
 
-        // Get filter parameters
+        // Get filter parameters - Updated default for monthly
         $filter = $request->get('filter', 'monthly');
-        $period = $request->get('period', now()->format('Y-m'));
+        $period = $request->get('period', now()->format('Y')); // Default to current year for monthly
 
         $baseOrderQuery = Order::whereHas('items.product', function ($query) use ($sellerId) {
             $query->where('seller_id', $sellerId);
@@ -182,11 +183,24 @@ class SellerController extends Controller
         ));
     }
 
+    private function getDefaultPeriod($filter)
+    {
+        switch ($filter) {
+            case 'weekly':
+                return now()->format('Y-m'); // Current month for weekly view
+            case 'monthly':
+                return now()->format('Y'); // Current year for monthly view
+            case 'yearly':
+                return now()->format('Y'); // Current year for yearly view
+            default:
+                return now()->format('Y-m');
+        }
+    }
+
     private function generateChartData($sellerId, $filter, $period)
     {
         $chartData = [];
         $labels = [];
-
 
         switch ($filter) {
             case 'weekly':
@@ -247,13 +261,12 @@ class SellerController extends Controller
                 }
                 break;
 
-
             case 'monthly':
-                // Generate 12 months data
-                $startDate = now()->subMonths(11)->startOfMonth();
+                // Updated: Generate data from January to December for the selected year
+                $year = (int) $period;
 
-                for ($i = 0; $i < 12; $i++) {
-                    $monthStart = $startDate->copy()->addMonths($i)->startOfMonth();
+                for ($month = 1; $month <= 12; $month++) {
+                    $monthStart = Carbon::createFromDate($year, $month, 1)->startOfMonth();
                     $monthEnd = $monthStart->copy()->endOfMonth();
 
                     $sales = OrderItem::whereHas('product', function ($query) use ($sellerId) {
@@ -309,11 +322,12 @@ class SellerController extends Controller
                 break;
 
             case 'monthly':
-                $current = Carbon::createFromFormat('Y-m', $period);
+                // Updated: Show year navigation for monthly view
+                $year = (int) $period;
                 $navigation = [
-                    'current' => $current->format('Y'),
-                    'previous' => $current->copy()->subYear()->format('Y-m'),
-                    'next' => $current->copy()->addYear()->format('Y-m')
+                    'current' => (string) $year,
+                    'previous' => (string) ($year - 1),
+                    'next' => (string) ($year + 1)
                 ];
                 break;
 
@@ -801,7 +815,7 @@ class SellerController extends Controller
 
         Log::info('Data produk berhasil diperbarui', ['product_id' => $product->id]);
 
-        $currentImages = $product->images ? json_decode($product->images, true) : [];
+        $currentImages = is_string($product->images) ? json_decode($product->images, true) : ($product->images ?? []);
 
         // Hapus gambar yang dihapus user
         if ($request->has('removed_images') && $request->removed_images) {
@@ -879,8 +893,10 @@ class SellerController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Product $product)
+    public function destroy($id)
     {
+        $product = Product::findOrFail($id);
+
         // Check if product belongs to authenticated seller
         if ($product->seller_id !== Auth::guard('seller')->id()) {
             abort(403, 'Unauthorized action.');
@@ -888,7 +904,8 @@ class SellerController extends Controller
 
         try {
             // Delete product images
-            $imagePaths = json_decode($product->images, true) ?? [];
+            $imagePaths = is_string($product->images) ? json_decode($product->images, true) : ($product->images ?? []);
+
             foreach ($imagePaths as $imagePath) {
                 if (Storage::disk('public')->exists($imagePath)) {
                     Storage::disk('public')->delete($imagePath);
