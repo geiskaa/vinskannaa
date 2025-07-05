@@ -10,6 +10,8 @@ document.addEventListener("DOMContentLoaded", function () {
     const subtotal = window.checkoutData.subtotal;
     const tax = window.checkoutData.tax;
     console.log("Subtotal:", subtotal);
+    console.log("Available addresses:", window.checkoutData.addresses);
+
     const shippingCosts = {
         regular: 15000,
         express: 25000,
@@ -29,6 +31,111 @@ document.addEventListener("DOMContentLoaded", function () {
                 "Rp " + newTotal.toLocaleString("id-ID");
         });
     });
+
+    // Address selection functionality
+    const changeAddressBtn = document.getElementById("change-address-btn");
+    const addressSelection = document.getElementById("address-selection");
+    const confirmAddressBtn = document.getElementById("confirm-address-btn");
+    const cancelAddressBtn = document.getElementById("cancel-address-btn");
+    const selectedAddressDisplay = document.getElementById(
+        "selected-address-display"
+    );
+    const selectedAddressId = document.getElementById("selected-address-id");
+
+    // Show address selection
+    if (changeAddressBtn) {
+        changeAddressBtn.addEventListener("click", function () {
+            addressSelection.classList.remove("hidden");
+            changeAddressBtn.style.display = "none";
+        });
+    }
+
+    // Cancel address selection
+    if (cancelAddressBtn) {
+        cancelAddressBtn.addEventListener("click", function () {
+            addressSelection.classList.add("hidden");
+            if (changeAddressBtn) changeAddressBtn.style.display = "block";
+        });
+    }
+
+    // Confirm address selection
+    if (confirmAddressBtn) {
+        confirmAddressBtn.addEventListener("click", function () {
+            const selectedRadio = document.querySelector(
+                'input[name="address_selection"]:checked'
+            );
+            if (selectedRadio) {
+                const addressId = selectedRadio.value;
+                console.log("Selected address ID:", addressId);
+                console.log(
+                    "Looking for address in:",
+                    window.checkoutData.addresses
+                );
+
+                // Convert addressId to number for comparison
+                const addressData = window.checkoutData.addresses.find(
+                    (addr) => parseInt(addr.id) === parseInt(addressId)
+                );
+
+                console.log("Found address data:", addressData);
+
+                if (addressData) {
+                    // Update display
+                    const displayHtml = `
+                        <input type="hidden" name="address_id" value="${addressId}" id="selected-address-id">
+                        <div class="flex items-start justify-between">
+                            <div class="flex-1">
+                                <div class="flex items-center mb-2">
+                                    <h3 class="font-semibold text-gray-900">${
+                                        addressData.recipient_name ||
+                                        "Tidak ada nama"
+                                    }</h3>
+                                    ${
+                                        addressData.label
+                                            ? `<span class="ml-2 px-2 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded">${addressData.label}</span>`
+                                            : ""
+                                    }
+                                    ${
+                                        addressData.is_primary
+                                            ? '<span class="ml-2 px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded">Utama</span>'
+                                            : ""
+                                    }
+                                </div>
+                                <p class="text-gray-600 mb-1">${
+                                    addressData.phone || "Tidak ada telepon"
+                                }</p>
+                                <p class="text-gray-600">${
+                                    addressData.formatted_address ||
+                                    addressData.full_address +
+                                        ", " +
+                                        addressData.city +
+                                        ", " +
+                                        addressData.state +
+                                        " " +
+                                        addressData.postal_code
+                                }</p>
+                            </div>
+                        </div>
+                    `;
+
+                    selectedAddressDisplay.innerHTML = displayHtml;
+
+                    // Update reference to the newly created element
+                    // selectedAddressId.value = addressId; // Remove this line
+
+                    // Hide selection and show change button
+                    addressSelection.classList.add("hidden");
+                    if (changeAddressBtn)
+                        changeAddressBtn.style.display = "block";
+                } else {
+                    console.error("Address not found for ID:", addressId);
+                    showToast("Alamat tidak ditemukan", "error");
+                }
+            } else {
+                showToast("Silakan pilih alamat", "warning");
+            }
+        });
+    }
 
     // Form submission
     checkoutForm.addEventListener("submit", function (e) {
@@ -65,24 +172,51 @@ document.addEventListener("DOMContentLoaded", function () {
         formData.append("total_amount", total);
 
         // Handle address data - get from selected address
-        const selectedAddressId = document.getElementById(
+        // FIX: Use query selector to get the current element instead of cached reference
+        const selectedAddressIdElement = document.getElementById(
             "selected-address-id"
         );
-        if (selectedAddressId && selectedAddressId.value) {
-            const addressId = selectedAddressId.value;
+        console.log("Selected address ID element:", selectedAddressIdElement);
+        console.log(
+            "Selected address ID value:",
+            selectedAddressIdElement?.value
+        );
+
+        if (selectedAddressIdElement && selectedAddressIdElement.value) {
+            const addressId = selectedAddressIdElement.value;
             const addressData = window.checkoutData.addresses.find(
-                (addr) => addr.id == addressId
+                (addr) => parseInt(addr.id) === parseInt(addressId)
             );
+
+            console.log("Found address for checkout:", addressData);
 
             if (addressData) {
                 // Remove address_id and add individual address fields
                 formData.delete("address_id");
-                formData.append("name", addressData.recipient_name);
-                formData.append("phone", addressData.phone);
-                formData.append("address", addressData.address);
-                formData.append("city", addressData.city);
-                formData.append("province", addressData.province);
-                formData.append("postal_code", addressData.postal_code);
+                formData.append("name", addressData.recipient_name || "");
+                formData.append("phone", addressData.phone || "");
+
+                // Fix: Use the correct field names from your address data structure
+                formData.append(
+                    "address",
+                    addressData.full_address || addressData.address || ""
+                );
+                formData.append("city", addressData.city || "");
+                formData.append(
+                    "province",
+                    addressData.state || addressData.province || ""
+                );
+                formData.append("postal_code", addressData.postal_code || "");
+
+                // Debug: Log the data being sent
+                console.log("Form data being sent:", {
+                    name: addressData.recipient_name,
+                    phone: addressData.phone,
+                    address: addressData.full_address || addressData.address,
+                    city: addressData.city,
+                    province: addressData.state || addressData.province,
+                    postal_code: addressData.postal_code,
+                });
             } else {
                 showToast("Alamat tidak ditemukan", "error");
                 resetButton();
