@@ -12,7 +12,7 @@
                     <h1 class="text-2xl font-bold text-gray-900">Edit Produk</h1>
                     <p class="text-gray-600 mt-1">Ubah informasi produk Anda</p>
                 </div>
-                <a href="{{ route('seller.products') }}"
+                <a href="{{ route('seller.dashboard') }}"
                     class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -165,53 +165,74 @@
                     <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
                         <h2 class="text-lg font-semibold text-gray-900 mb-4">Gambar Produk</h2>
 
-                        <!-- Current Images -->
-                        @if ($product->images)
-                            <div class="mb-4">
-                                <p class="text-sm text-gray-600 mb-2">Gambar saat ini:</p>
-                                <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
-                                    @foreach (json_decode($product->images) as $image)
-                                        <div class="relative group">
+                        <!-- Combined Images Display -->
+                        <div class="mb-4">
+                            <div id="allImages" class="grid grid-cols-2 md:grid-cols-3 gap-4 min-h-[100px]">
+                                <!-- Existing Images -->
+                                @if ($product->images)
+                                    @foreach (json_decode($product->images) as $index => $image)
+                                        <div class="relative group existing-image image-item"
+                                            data-image="{{ $image }}">
+
                                             <img src="{{ asset('storage/' . $image) }}" alt="Product Image"
                                                 class="w-full h-24 object-cover rounded-lg border border-gray-200">
+
+                                            <!-- Delete Button -->
+                                            <button type="button"
+                                                class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+                                                onclick="removeExistingImage(this, '{{ $image }}')">
+                                                <svg class="w-3 h-3" fill="none" stroke="currentColor"
+                                                    viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                        d="M6 18L18 6M6 6l12 12"></path>
+                                                </svg>
+                                            </button>
+
+                                            <!-- Image Status Badge -->
                                             <div
-                                                class="absolute inset-0 bg-black bg-opacity-50 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                                <span class="text-white text-xs">Gambar lama</span>
+                                                class="absolute bottom-1 left-1 bg-blue-500 text-white text-xs px-2 py-1 rounded">
+                                                Existing
                                             </div>
                                         </div>
                                     @endforeach
-                                </div>
-                            </div>
-                        @endif
-
-                        <!-- New Images Upload -->
-                        <div>
-                            <label for="images" class="block text-sm font-medium text-gray-700 mb-2">
-                                Upload Gambar Baru (Opsional)
-                            </label>
-                            <div
-                                class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-blue-400 transition-colors">
-                                <input type="file" name="images[]" id="images" multiple accept="image/*"
-                                    class="hidden" onchange="previewImages(this)">
-                                <label for="images" class="cursor-pointer">
-                                    <svg class="w-12 h-12 text-gray-400 mx-auto mb-2" fill="none"
-                                        stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z">
-                                        </path>
-                                    </svg>
-                                    <span class="text-sm text-gray-600">Klik untuk upload gambar atau drag & drop</span>
-                                    <p class="text-xs text-gray-500 mt-1">PNG, JPG, JPEG hingga 5MB</p>
-                                </label>
+                                @endif
                             </div>
 
-                            <!-- Preview new images -->
-                            <div id="imagePreview" class="mt-4 grid grid-cols-2 md:grid-cols-3 gap-4 hidden"></div>
-
-                            @error('images')
-                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                            @enderror
+                            <!-- Show message if no images -->
+                            <div id="noImagesMessage"
+                                class="text-center text-gray-500 py-8 {{ $product->images && count(json_decode($product->images)) > 0 ? 'hidden' : '' }}">
+                                <svg class="w-12 h-12 text-gray-300 mx-auto mb-2" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z">
+                                    </path>
+                                </svg>
+                                <p class="text-sm">Belum ada gambar produk</p>
+                            </div>
                         </div>
+
+                        <!-- Upload Area -->
+                        <div
+                            class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-blue-400 transition-colors">
+                            <input type="file" name="new_images[]" id="images" multiple accept="image/*"
+                                class="hidden" class="hidden" onchange="addNewImages(this)">
+                            <label for="images" class="cursor-pointer">
+                                <svg class="w-12 h-12 text-gray-400 mx-auto mb-2" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M12 4v16m8-8H4"></path>
+                                </svg>
+                                <span class="text-sm text-gray-600">Tambah gambar baru</span>
+                                <p class="text-xs text-gray-500 mt-1">PNG, JPG, JPEG hingga 5MB</p>
+                            </label>
+                        </div>
+
+                        <!-- Hidden inputs for removed images -->
+                        <div id="removedImages"></div>
+
+                        @error('images')
+                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
                     </div>
                 </div>
 
@@ -232,7 +253,7 @@
                                 Update Produk
                             </button>
 
-                            <a href="{{ route('seller.products') }}"
+                            <a href="{{ route('seller.all-produk') }}"
                                 class="w-full bg-gray-100 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors text-center block">
                                 Batal
                             </a>
@@ -279,33 +300,154 @@
     </div>
 
     <script>
-        function previewImages(input) {
-            const preview = document.getElementById('imagePreview');
-            preview.innerHTML = '';
+        let newImageFiles = [];
+        let newImageIndex = 0;
+
+        function addNewImages(input) {
+            const container = document.getElementById('allImages');
+            const currentImageCount = container.querySelectorAll('.image-item').length;
 
             if (input.files && input.files.length > 0) {
-                preview.classList.remove('hidden');
+                // Check total image limit
+                if (currentImageCount + input.files.length > 10) {
+                    alert('Maksimal 10 gambar yang dapat diupload');
+                    input.value = '';
+                    return;
+                }
 
                 Array.from(input.files).forEach((file, index) => {
+                    // Validate file size (5MB)
+                    if (file.size > 5 * 1024 * 1024) {
+                        alert(`File ${file.name} terlalu besar. Maksimal 5MB`);
+                        return;
+                    }
+
+                    // Validate file type
+                    if (!file.type.startsWith('image/')) {
+                        alert(`File ${file.name} bukan gambar`);
+                        return;
+                    }
+
+                    // Store file for form submission
+                    newImageFiles.push(file);
+
                     const reader = new FileReader();
                     reader.onload = function(e) {
                         const div = document.createElement('div');
-                        div.className = 'relative group';
+                        div.className = 'relative group image-item';
+                        div.setAttribute('data-type', 'new');
+                        div.setAttribute('data-index', newImageIndex);
+
                         div.innerHTML = `
                     <img src="${e.target.result}" 
-                         alt="Preview ${index + 1}" 
+                         alt="New Image ${newImageIndex + 1}" 
                          class="w-full h-24 object-cover rounded-lg border border-gray-200">
-                    <div class="absolute inset-0 bg-black bg-opacity-50 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                        <span class="text-white text-xs">Gambar baru</span>
+                    <button type="button" onclick="removeNewImage(this, ${newImageIndex})"
+                        class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                    <div class="absolute bottom-1 left-1 bg-green-600 bg-opacity-80 text-white text-xs px-2 py-1 rounded">
+                        New
                     </div>
                 `;
-                        preview.appendChild(div);
+
+                        container.appendChild(div);
+                        newImageIndex++;
                     };
                     reader.readAsDataURL(file);
                 });
-            } else {
-                preview.classList.add('hidden');
             }
+
+            // Update file input with new files
+            updateFileInput();
         }
+
+        function removeExistingImage(button, imagePath) {
+            console.log('Removing existing image:', imagePath);
+            const imageItem = button.closest('.image-item');
+
+            // Create hidden input to track removed image
+            const removedInput = document.createElement('input');
+            removedInput.type = 'hidden';
+            removedInput.name = 'removed_images[]';
+            removedInput.value = imagePath;
+
+            document.getElementById('removedImages').appendChild(removedInput);
+
+            // Remove from DOM
+            imageItem.remove();
+        }
+
+        function removeNewImage(button, index) {
+            const imageItem = button.closest('.image-item');
+
+            // Find and remove from newImageFiles array
+            const fileIndex = newImageFiles.findIndex((file, i) => i === index);
+            if (fileIndex !== -1) {
+                newImageFiles.splice(fileIndex, 1);
+            }
+
+            // Remove from DOM
+            imageItem.remove();
+
+            // Update file input
+            updateFileInput();
+        }
+
+        function updateFileInput() {
+            const input = document.getElementById('images');
+            const dt = new DataTransfer();
+
+            // Add remaining files to DataTransfer
+            newImageFiles.forEach(file => {
+                dt.items.add(file);
+            });
+
+            // Update input files
+            input.files = dt.files;
+        }
+
+        // Drag and drop functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const uploadArea = document.querySelector('.border-dashed');
+
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                uploadArea.addEventListener(eventName, preventDefaults, false);
+            });
+
+            function preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+
+            ['dragenter', 'dragover'].forEach(eventName => {
+                uploadArea.addEventListener(eventName, highlight, false);
+            });
+
+            ['dragleave', 'drop'].forEach(eventName => {
+                uploadArea.addEventListener(eventName, unhighlight, false);
+            });
+
+            function highlight(e) {
+                uploadArea.classList.add('border-blue-500', 'bg-blue-50');
+            }
+
+            function unhighlight(e) {
+                uploadArea.classList.remove('border-blue-500', 'bg-blue-50');
+            }
+
+            uploadArea.addEventListener('drop', handleDrop, false);
+
+            function handleDrop(e) {
+                const dt = e.dataTransfer;
+                const files = dt.files;
+
+                const input = document.getElementById('images');
+                input.files = files;
+                addNewImages(input);
+            }
+        });
     </script>
 @endsection

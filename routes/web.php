@@ -92,6 +92,24 @@ Route::prefix('seller')->name('seller.')->group(function () {
     Route::get('/all-produk', [SellerController::class, 'allProduk'])->name('all-produk');
     Route::get('/list-pesanan', [SellerController::class, 'listPesanan'])->name('list-pesanan');
     Route::get('/detail-produk/{slug}', [SellerController::class, 'detailProduk'])->name('detail-produk');
-    Route::get('/tambah-produk', [SellerController::class, 'tambahProduk'])->name('tambah-produk');
+    Route::get('/tambah-produk', [SellerController::class, 'create'])->name('tambah-produk');
+    Route::post('/tambah-produk/post', [SellerController::class, 'store'])->name('tambah-produk.post');
     Route::get('/edit-produk/{id}', [SellerController::class, 'editProduk'])->name('edit-produk');
+    Route::put('/edit-produk/{product}', [SellerController::class, 'update'])->name('products.update');
+    Route::get('/delete-produk/{id}', [SellerController::class, 'deleteProduk'])->name('edit-produk');
+    Route::get('/delete-produk/{id}', [SellerController::class, 'deleteProduk'])->name('edit-produk');
+
+    Route::post('/list-pesanan/{orderId}/konfirmasi', [SellerController::class, 'konfirmasiPesanan'])->name('konfirmasi');
+    Route::post('/list-pesanan/{orderId}/proses', [SellerController::class, 'prosesPesanan'])->name('proses');
+    Route::post('/list-pesanan/{orderId}/kirim', [SellerController::class, 'kirimPesanan'])->name('kirim');
+
+    // Batch update status
+    Route::post('batch-update', [SellerController::class, 'updateStatusBatch'])->name('batch.update');
+
+    // Detail pesanan
+    Route::get('/list-pesanan/{orderId}/detail', [SellerController::class, 'detailPesanan'])->name('detail');
+
 });
+
+Route::get('/register/seller', [AuthController::class, 'showRegistrationSellerForm'])->name('seller.register');
+Route::post('/register/seller', [AuthController::class, 'registerSeller'])->name('seller.register.submit');

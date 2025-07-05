@@ -20,9 +20,8 @@
         <!-- Form Card -->
         <div class="bg-white rounded-lg shadow-sm border border-gray-200">
             <div class="p-6">
-                <form action="" method="POST" enctype="multipart/form-data" id="productForm">
+                <form action="/seller/tambah-produk/post" method="POST" enctype="multipart/form-data" id="productForm">
                     @csrf
-
                     <!-- Product Images -->
                     <div class="mb-8">
                         <h3 class="text-lg font-semibold text-gray-900 mb-4">Foto Produk</h3>
