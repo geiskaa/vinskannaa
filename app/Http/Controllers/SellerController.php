@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
+use App\Models\ProductRating;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -371,6 +372,155 @@ class SellerController extends Controller
         return view('seller.pesanan-list', compact('orders', 'statusOptions'));
     }
 
+
+    public function listUlasan(Request $request)
+    {
+        // Get current seller ID from authenticated seller
+        $sellerId = auth('seller')->id();
+
+        // Rating filter options
+        $ratingOptions = [
+            'all' => 'Semua Rating',
+            '5' => '5 Bintang',
+            '4' => '4 Bintang',
+            '3' => '3 Bintang',
+            '2' => '2 Bintang',
+            '1' => '1 Bintang'
+        ];
+
+        // Build query for reviews
+        $query = ProductRating::with(['user', 'product', 'order'])
+            ->whereHas('product', function ($q) use ($sellerId) {
+                $q->where('seller_id', $sellerId);
+            })
+            ->orderBy('created_at', 'desc');
+
+        // Apply date range filter
+        if ($request->filled('date_from')) {
+            $query->whereDate('created_at', '>=', $request->date_from);
+        }
+
+        if ($request->filled('date_to')) {
+            $query->whereDate('created_at', '<=', $request->date_to);
+        }
+
+        // Apply rating filter
+        if ($request->filled('rating') && $request->rating !== 'all') {
+            $query->where('rating', $request->rating);
+        }
+
+        // Get paginated reviews
+        $reviews = $query->paginate(10);
+
+        // Calculate statistics
+        $statsQuery = ProductRating::whereHas('product', function ($q) use ($sellerId) {
+            $q->where('seller_id', $sellerId);
+        });
+
+        // Total reviews
+        $totalReviews = $statsQuery->count();
+
+        // Average rating
+        $averageRating = $statsQuery->avg('rating') ?? 0;
+
+        // Monthly reviews (current month)
+        $monthlyReviews = ProductRating::whereHas('product', function ($q) use ($sellerId) {
+            $q->where('seller_id', $sellerId);
+        })
+            ->whereMonth('created_at', now()->month)
+            ->whereYear('created_at', now()->year)
+            ->count();
+
+        // Calculate missing statistics if needed for the cards
+        $statistics = [
+            'total_reviews' => $totalReviews,
+            'average_rating' => round($averageRating, 1),
+            'monthly_reviews' => $monthlyReviews,
+
+        ];
+
+        return view('seller.ulasan-list', compact(
+            'reviews',
+            'ratingOptions',
+            'totalReviews',
+            'averageRating',
+            'monthlyReviews',
+            'statistics'
+        ));
+    }
+
+    // Function to handle reply to review
+    public function replyUlasan(Request $request, $reviewId)
+    {
+        $request->validate([
+            'reply' => 'required|string|max:1000'
+        ]);
+
+        // Get the review and check if it belongs to seller's product
+        $review = ProductRating::with('product')
+            ->whereHas('product', function ($q) {
+                $q->where('seller_id', auth('seller')->id());
+            })
+            ->findOrFail($reviewId);
+
+        // Update the review with reply
+        $review->update([
+            'reply' => $request->reply,
+            'reply_created_at' => now()
+        ]);
+
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Balasan berhasil dikirim!'
+            ]);
+        }
+
+        return redirect()->back()->with('success', 'Balasan berhasil dikirim!');
+    }
+
+    // Optional: Function to get review statistics for dashboard
+    public function getReviewStats()
+    {
+        $sellerId = auth('seller')->id();
+
+        $stats = [
+            'total_reviews' => ProductRating::whereHas('product', function ($q) use ($sellerId) {
+                $q->where('seller_id', $sellerId);
+            })->count(),
+
+            'average_rating' => ProductRating::whereHas('product', function ($q) use ($sellerId) {
+                $q->where('seller_id', $sellerId);
+            })->avg('rating') ?? 0,
+
+            'rating_distribution' => ProductRating::whereHas('product', function ($q) use ($sellerId) {
+                $q->where('seller_id', $sellerId);
+            })
+                ->selectRaw('rating, COUNT(*) as count')
+                ->groupBy('rating')
+                ->orderBy('rating', 'desc')
+                ->pluck('count', 'rating')
+                ->toArray(),
+
+            'monthly_trend' => ProductRating::whereHas('product', function ($q) use ($sellerId) {
+                $q->where('seller_id', $sellerId);
+            })
+                ->selectRaw('MONTH(created_at) as month, COUNT(*) as count')
+                ->whereYear('created_at', now()->year)
+                ->groupBy('month')
+                ->orderBy('month')
+                ->pluck('count', 'month')
+                ->toArray(),
+
+            'pending_replies' => ProductRating::whereHas('product', function ($q) use ($sellerId) {
+                $q->where('seller_id', $sellerId);
+            })
+                ->whereNull('reply')
+                ->count()
+        ];
+
+        return $stats;
+    }
     // Fungsi untuk konfirmasi pesanan
     public function konfirmasiPesanan(Request $request, $orderId)
     {
