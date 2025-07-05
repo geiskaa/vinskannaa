@@ -203,4 +203,6 @@
     <!-- Toast Container -->
     <div id="toast-container" class="fixed top-4 right-4 z-50 space-y-2"></div>
 
+    @include('components.product-rating')
+
 @endsection

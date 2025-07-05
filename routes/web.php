@@ -93,6 +93,7 @@ Route::prefix('seller')->name('seller.')->group(function () {
 
     Route::get('/all-produk', [SellerController::class, 'allProduk'])->name('all-produk');
     Route::get('/list-pesanan', [SellerController::class, 'listPesanan'])->name('list-pesanan');
+    Route::get('/list-ulasan', [SellerController::class, 'listUlasan'])->name('list-ulasan');
     Route::get('/detail-produk/{slug}', [SellerController::class, 'detailProduk'])->name('detail-produk');
     Route::get('/tambah-produk', [SellerController::class, 'create'])->name('tambah-produk');
     Route::post('/tambah-produk/post', [SellerController::class, 'store'])->name('tambah-produk.post');

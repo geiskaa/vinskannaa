@@ -210,9 +210,12 @@ class ProductController extends Controller
 
     public function show($slug)
     {
-        $product = Product::where('slug', $slug)
-            ->with('ratings') // jika ada relasi
-            ->firstOrFail();
+        $product = Product::with([
+            'seller',
+            'ratings' => function ($query) {
+                $query->with(['user', 'order'])->latest();
+            }
+        ])->where('slug', $slug)->firstOrFail();
 
         // Jika user login, cek apakah produk ini di-favoritkan atau ada di keranjang
         if (auth('web')->check()) {
@@ -233,6 +236,49 @@ class ProductController extends Controller
         }
 
         return view('detail-produk', compact('product'));
+    }
+
+    public function getRatings(Product $product, Request $request)
+    {
+        $ratings = $product->ratings()
+            ->with(['user', 'order'])
+            ->when($request->sort === 'newest', function ($query) {
+                return $query->latest();
+            })
+            ->when($request->sort === 'oldest', function ($query) {
+                return $query->oldest();
+            })
+            ->when($request->sort === 'highest', function ($query) {
+                return $query->orderBy('rating', 'desc');
+            })
+            ->when($request->sort === 'lowest', function ($query) {
+                return $query->orderBy('rating', 'asc');
+            })
+            ->when($request->filter_rating, function ($query) use ($request) {
+                return $query->where('rating', $request->filter_rating);
+            })
+            ->paginate(10);
+
+        // Calculate rating statistics
+        $stats = [
+            'average' => $product->averageRating(),
+            'total' => $product->ratings()->count(),
+            'distribution' => []
+        ];
+
+        // Get rating distribution
+        for ($i = 1; $i <= 5; $i++) {
+            $count = $product->ratings()->where('rating', $i)->count();
+            $stats['distribution'][$i] = [
+                'count' => $count,
+                'percentage' => $stats['total'] > 0 ? ($count / $stats['total']) * 100 : 0
+            ];
+        }
+
+        return response()->json([
+            'ratings' => $ratings,
+            'stats' => $stats
+        ]);
     }
 
 
