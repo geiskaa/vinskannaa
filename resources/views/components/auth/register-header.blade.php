@@ -7,4 +7,10 @@
             Sign in here
         </a>
     </p>
+    <p class="mt-2 text-sm text-gray-600">
+        Ingin menjual produk?
+        <a href="{{ route('seller.register') }}" class="font-medium text-blue-600 hover:text-blue-500">
+            Daftar sebagai penjual
+        </a>
+    </p>
 </div>

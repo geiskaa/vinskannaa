@@ -24,7 +24,7 @@
         </div>
 
         <!-- Form -->
-        <form action="{{ route('seller.products.update', $product->id) }}" method="POST" enctype="multipart/form-data">
+        <form action="{{ route('seller.update-produk', $product->id) }}" method="POST" enctype="multipart/form-data">
             @csrf
             @method('PUT')
 
@@ -169,8 +169,13 @@
                         <div class="mb-4">
                             <div id="allImages" class="grid grid-cols-2 md:grid-cols-3 gap-4 min-h-[100px]">
                                 <!-- Existing Images -->
-                                @if ($product->images)
-                                    @foreach (json_decode($product->images) as $index => $image)
+                                @php
+                                    $images = is_string($product->images)
+                                        ? json_decode($product->images)
+                                        : $product->images;
+                                @endphp
+                                @if ($images)
+                                    @foreach ($images as $index => $image)
                                         <div class="relative group existing-image image-item"
                                             data-image="{{ $image }}">
 
@@ -197,10 +202,15 @@
                                     @endforeach
                                 @endif
                             </div>
+                            @php
+                                $images = is_string($product->images)
+                                    ? json_decode($product->images)
+                                    : $product->images;
+                            @endphp
 
                             <!-- Show message if no images -->
                             <div id="noImagesMessage"
-                                class="text-center text-gray-500 py-8 {{ $product->images && count(json_decode($product->images)) > 0 ? 'hidden' : '' }}">
+                                class="text-center text-gray-500 py-8  {{ $images && count($images) > 0 ? 'hidden' : '' }}">
                                 <svg class="w-12 h-12 text-gray-300 mx-auto mb-2" fill="none" stroke="currentColor"
                                     viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
