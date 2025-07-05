@@ -89,6 +89,8 @@ Route::put('/pesanan-saya/{id}/update-status', [OrderController::class, 'updateS
 
 Route::prefix('seller')->name('seller.')->group(function () {
     Route::get('/dashboard', [SellerController::class, 'dashboard'])->name('dashboard');
+    Route::get('/dashboard/data', [SellerController::class, 'dashboardData'])->name('seller.dashboard.data');
+
     Route::get('/all-produk', [SellerController::class, 'allProduk'])->name('all-produk');
     Route::get('/list-pesanan', [SellerController::class, 'listPesanan'])->name('list-pesanan');
     Route::get('/detail-produk/{slug}', [SellerController::class, 'detailProduk'])->name('detail-produk');

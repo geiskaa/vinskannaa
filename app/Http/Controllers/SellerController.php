@@ -15,6 +15,32 @@ use Str;
 
 class SellerController extends Controller
 {
+
+    public function dashboardData(Request $request)
+    {
+        // Check if this is an AJAX request
+        if (!$request->ajax()) {
+            return redirect()->route('seller.dashboard');
+        }
+
+        $sellerId = Auth::guard('seller')->id();
+        $filter = $request->get('filter', 'monthly');
+        $period = $request->get('period', now()->format('Y-m'));
+
+        // Generate chart data
+        $chartData = $this->generateChartData($sellerId, $filter, $period);
+
+        // Navigation data
+        $navigationData = $this->getNavigationData($filter, $period);
+
+        return response()->json([
+            'chartData' => $chartData,
+            'navigationData' => $navigationData,
+            'filter' => $filter,
+            'period' => $period
+        ]);
+    }
+
     /**
      * Display a listing of the resource.
      */
@@ -27,26 +53,27 @@ class SellerController extends Controller
         return view('seller.all-produk', compact('products'));
     }
 
-    public function dashboard()
+    public function dashboard(Request $request)
     {
-        $sellerId = Auth::guard('seller')->id();
+        // Handle AJAX requests
+        if ($request->ajax()) {
+            return $this->dashboardData($request);
+        }
 
+        $sellerId = Auth::guard('seller')->id();
         $productsCount = Product::where('seller_id', $sellerId)->count();
+
+        // Get filter parameters
+        $filter = $request->get('filter', 'monthly');
+        $period = $request->get('period', now()->format('Y-m'));
 
         $baseOrderQuery = Order::whereHas('items.product', function ($query) use ($sellerId) {
             $query->where('seller_id', $sellerId);
         });
 
-        \Log::info('Query dasar pesanan untuk seller', ['seller_id' => $sellerId]);
-
         $totalOrders = $baseOrderQuery->count();
-        \Log::info('Jumlah total pesanan', ['total_orders' => $totalOrders]);
-
         $activeOrders = (clone $baseOrderQuery)->whereIn('order_status', ['menunggu_konfirmasi', 'diproses', 'dikirim'])->count();
-        \Log::info('Jumlah pesanan aktif', ['active_orders' => $activeOrders]);
-
         $completedOrders = (clone $baseOrderQuery)->where('order_status', 'selesai')->count();
-        \Log::info('Jumlah pesanan selesai', ['completed_orders' => $completedOrders]);
 
         $totalRevenue = OrderItem::whereHas('product', function ($query) use ($sellerId) {
             $query->where('seller_id', $sellerId);
@@ -93,11 +120,9 @@ class SellerController extends Controller
                 $sellerItems = $order->items->filter(function ($item) use ($sellerId) {
                     return $item->product->seller_id == $sellerId;
                 });
-
                 $amount = $sellerItems->sum(function ($item) {
                     return $item->quantity * $item->price;
                 });
-
                 return [
                     'order_id' => $order->id,
                     'product_name' => $sellerItems->first()->product->name ?? 'Multiple Products',
@@ -108,37 +133,14 @@ class SellerController extends Controller
                 ];
             });
 
-        $startDate = now()->subMonths(6)->startOfMonth();
-        $endDate = now()->endOfMonth();
+        // Generate chart data
+        $chartData = $this->generateChartData($sellerId, $filter, $period);
 
-        $monthlySales = OrderItem::whereHas('product', function ($query) use ($sellerId) {
-            $query->where('seller_id', $sellerId);
-        })->whereHas('order', function ($query) use ($startDate, $endDate) {
-            $query->where('order_status', 'selesai')
-                ->whereBetween('created_at', [$startDate, $endDate]);
-        })->selectRaw('MONTH(orders.created_at) as month, YEAR(orders.created_at) as year, SUM(order_items.quantity * order_items.price) as total')
-            ->join('orders', 'order_items.order_id', '=', 'orders.id')
-            ->groupBy('year', 'month')
-            ->orderBy('year', 'asc')
-            ->orderBy('month', 'asc')
-            ->get()
-            ->keyBy(function ($item) {
-                return $item->year . '-' . str_pad($item->month, 2, '0', STR_PAD_LEFT);
-            });
-
-        $chartData = [];
-        $currentDate = now()->subMonths(5)->startOfMonth();
-        for ($i = 0; $i < 6; $i++) {
-            $key = $currentDate->format('Y-m');
-            $salesData = $monthlySales->get($key);
-            $chartData[] = $salesData ? round($salesData->total) : 0;
-            $currentDate->addMonth();
-        }
-
-        $currentPeriodStart = now()->subMonths(6)->startOfMonth();
+        // Calculate growth percentages (12 months comparison)
+        $currentPeriodStart = now()->subMonths(12)->startOfMonth();
         $currentPeriodEnd = now()->endOfMonth();
-        $previousPeriodStart = now()->subMonths(12)->startOfMonth();
-        $previousPeriodEnd = now()->subMonths(6)->endOfMonth();
+        $previousPeriodStart = now()->subMonths(24)->startOfMonth();
+        $previousPeriodEnd = now()->subMonths(12)->endOfMonth();
 
         $previousTotalOrders = Order::whereHas('items.product', function ($query) use ($sellerId) {
             $query->where('seller_id', $sellerId);
@@ -159,6 +161,9 @@ class SellerController extends Controller
             ? round((($totalRevenue - $previousRevenue) / $previousRevenue) * 100, 1)
             : 0;
 
+        // Navigation data for period selector
+        $navigationData = $this->getNavigationData($filter, $period);
+
         return view('dashboard-seller', compact(
             'productsCount',
             'totalOrders',
@@ -169,8 +174,159 @@ class SellerController extends Controller
             'recentOrders',
             'chartData',
             'ordersGrowth',
-            'revenueGrowth'
+            'revenueGrowth',
+            'filter',
+            'period',
+            'navigationData'
         ));
+    }
+
+    private function generateChartData($sellerId, $filter, $period)
+    {
+        $chartData = [];
+        $labels = [];
+
+
+        switch ($filter) {
+            case 'weekly':
+                $startOfMonth = Carbon::createFromFormat('Y-m', $period)->startOfMonth();
+                $endOfMonth = $startOfMonth->copy()->endOfMonth();
+
+                $chartData = [];
+                $labels = [];
+
+                $weekCounter = 1;
+                $date = $startOfMonth->copy();
+
+                while ($date->lte($endOfMonth)) {
+                    $weekStart = $date->copy();
+                    $weekEnd = $date->copy()->addDays(6);
+
+                    // Jika minggu terakhir < 4 hari, gabungkan ke minggu sebelumnya
+                    if ($weekEnd->gt($endOfMonth)) {
+                        $daysRemaining = $endOfMonth->diffInDays($weekStart) + 1; // +1 termasuk hari terakhir
+
+                        if ($daysRemaining < 4) {
+                            // Gabungkan ke minggu sebelumnya, keluar dari loop
+                            if (!empty($chartData)) {
+                                // Tambahkan ke minggu terakhir sebelumnya
+                                $previousStart = $date->copy()->subDays(7);
+                                $previousEnd = $endOfMonth->copy();
+
+                                $extraSales = OrderItem::whereHas('product', function ($query) use ($sellerId) {
+                                    $query->where('seller_id', $sellerId);
+                                })->whereHas('order', function ($query) use ($previousStart, $previousEnd) {
+                                    $query->where('order_status', 'selesai')
+                                        ->whereBetween('created_at', [$previousStart, $previousEnd]);
+                                })->sum(\DB::raw('quantity * price'));
+
+                                // Tambahkan ke data terakhir
+                                $chartData[count($chartData) - 1] += round($extraSales ?? 0);
+                                $labels[count($labels) - 1] .= ' - ' . $endOfMonth->format('j');
+                            }
+
+                            break; // tidak buat minggu baru
+                        }
+
+                        $weekEnd = $endOfMonth->copy(); // batasin ke akhir bulan
+                    }
+
+                    $sales = OrderItem::whereHas('product', function ($query) use ($sellerId) {
+                        $query->where('seller_id', $sellerId);
+                    })->whereHas('order', function ($query) use ($weekStart, $weekEnd) {
+                        $query->where('order_status', 'selesai')
+                            ->whereBetween('created_at', [$weekStart, $weekEnd]);
+                    })->sum(\DB::raw('quantity * price'));
+
+                    $chartData[] = round($sales ?? 0);
+                    $labels[] = 'Week ' . $weekCounter . ' (' . $weekStart->format('j') . '-' . $weekEnd->format('j') . ')';
+
+                    $weekCounter++;
+                    $date->addDays(7);
+                }
+                break;
+
+
+            case 'monthly':
+                // Generate 12 months data
+                $startDate = now()->subMonths(11)->startOfMonth();
+
+                for ($i = 0; $i < 12; $i++) {
+                    $monthStart = $startDate->copy()->addMonths($i)->startOfMonth();
+                    $monthEnd = $monthStart->copy()->endOfMonth();
+
+                    $sales = OrderItem::whereHas('product', function ($query) use ($sellerId) {
+                        $query->where('seller_id', $sellerId);
+                    })->whereHas('order', function ($query) use ($monthStart, $monthEnd) {
+                        $query->where('order_status', 'selesai')
+                            ->whereBetween('created_at', [$monthStart, $monthEnd]);
+                    })->sum(\DB::raw('quantity * price'));
+
+                    $chartData[] = round($sales ?? 0);
+                    $labels[] = $monthStart->format('M Y');
+                }
+                break;
+
+            case 'yearly':
+                // Generate yearly data for the selected year and previous years
+                $year = (int) $period;
+                $startYear = $year - 4; // Show 5 years total
+
+                for ($i = 0; $i < 5; $i++) {
+                    $currentYear = $startYear + $i;
+                    $yearStart = Carbon::createFromDate($currentYear, 1, 1)->startOfYear();
+                    $yearEnd = $yearStart->copy()->endOfYear();
+
+                    $sales = OrderItem::whereHas('product', function ($query) use ($sellerId) {
+                        $query->where('seller_id', $sellerId);
+                    })->whereHas('order', function ($query) use ($yearStart, $yearEnd) {
+                        $query->where('order_status', 'selesai')
+                            ->whereBetween('created_at', [$yearStart, $yearEnd]);
+                    })->sum(\DB::raw('quantity * price'));
+
+                    $chartData[] = round($sales ?? 0);
+                    $labels[] = (string) $currentYear;
+                }
+                break;
+        }
+
+        return ['data' => $chartData, 'labels' => $labels];
+    }
+
+    private function getNavigationData($filter, $period)
+    {
+        $navigation = [];
+
+        switch ($filter) {
+            case 'weekly':
+                $current = Carbon::createFromFormat('Y-m', $period);
+                $navigation = [
+                    'current' => $current->format('F Y'),
+                    'previous' => $current->copy()->subMonth()->format('Y-m'),
+                    'next' => $current->copy()->addMonth()->format('Y-m')
+                ];
+                break;
+
+            case 'monthly':
+                $current = Carbon::createFromFormat('Y-m', $period);
+                $navigation = [
+                    'current' => $current->format('Y'),
+                    'previous' => $current->copy()->subYear()->format('Y-m'),
+                    'next' => $current->copy()->addYear()->format('Y-m')
+                ];
+                break;
+
+            case 'yearly':
+                $year = (int) $period;
+                $navigation = [
+                    'current' => (string) $year,
+                    'previous' => (string) ($year - 1),
+                    'next' => (string) ($year + 1)
+                ];
+                break;
+        }
+
+        return $navigation;
     }
 
     public function listPesanan(Request $request)

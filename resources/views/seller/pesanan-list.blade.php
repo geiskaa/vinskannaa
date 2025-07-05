@@ -19,7 +19,8 @@
             <!-- Filter Section -->
             <div class="flex items-center space-x-4">
                 <!-- Date Range Filter -->
-                <form method="GET" action="{{ route('seller.list-pesanan') }}" class="flex items-center space-x-2">
+                <form method="GET" action="{{ route('seller.list-pesanan') }}" class="flex items-center space-x-2"
+                    id="filter-form">
                     <div class="flex items-center space-x-2 bg-white px-4 py-2 rounded-lg border border-gray-200">
                         <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -268,7 +269,15 @@
 
             // Function to set status filter
             function setStatusFilter(status) {
-                document.getElementById('status-filter').value = status;
+                const input = document.getElementById('status-filter');
+                if (input) {
+                    input.value = status;
+
+                    const form = document.getElementById('filter-form');
+                    if (form) {
+                        form.submit(); // langsung submit form
+                    }
+                }
             }
 
             // Select all checkbox functionality
@@ -278,6 +287,80 @@
                     checkbox.checked = this.checked;
                 });
             });
+
+            document.addEventListener('DOMContentLoaded', function() {
+                // Handle status dropdown change
+                const statusDropdown = document.getElementById('status-filter');
+                const dateFromInput = document.getElementById('date-from');
+                const dateToInput = document.getElementById('date-to');
+                const perPageSelect = document.getElementById('per-page');
+
+                if (statusDropdown) {
+                    statusDropdown.addEventListener('change', function() {
+                        filterOrders();
+                    });
+                }
+
+                if (dateFromInput) {
+                    dateFromInput.addEventListener('change', function() {
+                        filterOrders();
+                    });
+                }
+
+                if (dateToInput) {
+                    dateToInput.addEventListener('change', function() {
+                        filterOrders();
+                    });
+                }
+
+                if (perPageSelect) {
+                    perPageSelect.addEventListener('change', function() {
+                        filterOrders();
+                    });
+                }
+
+                function filterOrders() {
+                    const status = statusDropdown ? statusDropdown.value : '';
+                    const dateFrom = dateFromInput ? dateFromInput.value : '';
+                    const dateTo = dateToInput ? dateToInput.value : '';
+                    const perPage = perPageSelect ? perPageSelect.value : 10;
+
+                    // Build URL with parameters
+                    const url = new URL(window.location.href);
+
+                    // Clear existing parameters
+                    url.searchParams.delete('status');
+                    url.searchParams.delete('date_from');
+                    url.searchParams.delete('date_to');
+                    url.searchParams.delete('per_page');
+                    url.searchParams.delete('page'); // Reset pagination
+
+                    // Add new parameters
+                    if (status && status !== 'all') {
+                        url.searchParams.set('status', status);
+                    }
+                    if (dateFrom) {
+                        url.searchParams.set('date_from', dateFrom);
+                    }
+                    if (dateTo) {
+                        url.searchParams.set('date_to', dateTo);
+                    }
+                    if (perPage && perPage !== '10') {
+                        url.searchParams.set('per_page', perPage);
+                    }
+
+                    // Redirect to new URL
+                    window.location.href = url.toString();
+                }
+            });
+
+            // Alternative: If you're using form submission
+            function submitFilterForm() {
+                const form = document.getElementById('filter-form');
+                if (form) {
+                    form.submit();
+                }
+            }
         </script>
     @endpush
 @endsection
