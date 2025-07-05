@@ -94,7 +94,6 @@ Route::prefix('seller')->name('seller.')->middleware('auth:seller')->group(funct
     Route::post('/tambah-produk/post', [SellerController::class, 'store'])->name('tambah-produk.post');
     Route::get('/edit-produk/{id}', [SellerController::class, 'editProduk'])->name('edit-produk');
     Route::put('/edit-produk/{product}', [SellerController::class, 'update'])->name('update-produk');
-    Route::get('/delete-produk/{id}', [SellerController::class, 'deleteProduk'])->name('delete-produk');
     Route::get('/detail-produk/{slug}', [SellerController::class, 'detailProduk'])->name('detail-produk');
 
     // Pesanan
@@ -103,6 +102,7 @@ Route::prefix('seller')->name('seller.')->middleware('auth:seller')->group(funct
     Route::post('/list-pesanan/{orderId}/konfirmasi', [SellerController::class, 'konfirmasiPesanan'])->name('pesanan.konfirmasi');
     Route::post('/list-pesanan/{orderId}/proses', [SellerController::class, 'prosesPesanan'])->name('pesanan.proses');
     Route::post('/list-pesanan/{orderId}/kirim', [SellerController::class, 'kirimPesanan'])->name('pesanan.kirim');
+    Route::get('/delete-produk/{id}', [SellerController::class, 'destroy'])->name('destroy');
 
     // Batch update status
     Route::post('/batch-update', [SellerController::class, 'updateStatusBatch'])->name('batch.update');

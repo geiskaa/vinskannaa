@@ -16,6 +16,7 @@ return new class extends Migration {
             $table->string('email')->unique();
             $table->string('phone')->nullable();
             $table->date('date_of_birth')->nullable();
+            $table->enum('gender', ['male', 'female'])->nullable();
             $table->string('google_id')->nullable();
             $table->string('facebook_id')->nullable();
             $table->string('role')->default('user');

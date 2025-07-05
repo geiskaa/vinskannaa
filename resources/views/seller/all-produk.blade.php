@@ -97,7 +97,7 @@
                                         <div class="py-1">
                                             <a href="/seller/edit-produk/{{ $product->id }}"
                                                 class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Edit</a>
-                                            <a href="#"
+                                            <a href="/seller/delete-produk/{{ $product->id }}"
                                                 class="block px-4 py-2 text-sm text-red-600 hover:bg-gray-100">Hapus</a>
                                         </div>
                                     </div>
