@@ -15,18 +15,35 @@ return new class extends Migration {
             $table->foreignId('seller_id')->constrained()->onDelete('cascade');
             $table->string('name');
             $table->string('slug')->unique();
-            $table->enum('section', ['men', 'women', 'kids']);
-            $table->enum('category', [
-                'kemeja',
-                'kaos',
-                'jaket',
-                'celana_panjang',
-                'celana_pendek',
-                'hoodie',
-                'dress',
-                'rok',
-                'sweater'
+
+            // Disini database untuk membuat segmentasi(section) dan kategori(category)
+            // File Asli Disini ygy
+            // $table->enum('section', ['men', 'women', 'kids']);
+            // $table->enum('category', [
+            //     'kemeja',
+            //     'kaos',
+            //     'jaket',
+            //     'celana_panjang',
+            //     'celana_pendek',
+            //     'hoodie',
+            //     'dress',
+            //     'rok',
+            //     'sweater'
+            //]);
+
+            // Disini segmentasi(section) dan kategori(category) baru
+            $table->enum('section', [
+                'Best Seller',
+                'Flashsale',
+                'New Collection',
             ]);
+            $table->enum('category', [
+                'Boquete',
+                'Tanaman Hias',
+                'Bingkai',
+            ]);
+            //=======================================================
+
             $table->decimal('price', 10, 2);
             $table->text('description')->nullable();
             $table->json('images')->nullable();
