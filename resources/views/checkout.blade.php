@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Checkout - ThriftHub')
+@section('title', 'Checkout - Vinskanna')
 
 @section('head')
     <!-- Midtrans Snap JS -->

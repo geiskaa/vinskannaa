@@ -1,0 +1,201 @@
+-- Insert Users
+INSERT INTO users (id, name, email, phone, gender, date_of_birth, role, email_verified_at, password, created_at, updated_at) VALUES
+(1, 'Ahmad Rizki', 'ahmad.rizki@gmail.com', '081234567890', 'male', '1995-03-15', 'user', NOW(), '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', NOW(), NOW()),
+(2, 'Siti Nurhaliza', 'siti.nurhaliza@gmail.com', '081234567891', 'female', '1998-07-22', 'user', NOW(), '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', NOW(), NOW()),
+(3, 'Budi Santoso', 'budi.santoso@gmail.com', '081234567892', 'male', '1992-11-08', 'user', NOW(), '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', NOW(), NOW()),
+(4, 'Dewi Lestari', 'dewi.lestari@gmail.com', '081234567893', 'female', '1996-05-12', 'user', NOW(), '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', NOW(), NOW()),
+(5, 'Andi Pratama', 'andi.pratama@gmail.com', '081234567894', 'male', '1994-09-30', 'user', NOW(), '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', NOW(), NOW()),
+(6, 'Maya Sari', 'maya.sari@gmail.com', '081234567895', 'female', '1997-12-18', 'user', NOW(), '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', NOW(), NOW());
+
+-- Insert Sellers
+INSERT INTO sellers (id, store_name, owner_name, email, phone_number, password, address, city, province, postal_code, logo, banner, description, status, created_at, updated_at) VALUES
+(1, 'Fashion Hub Jakarta', 'Rudi Hermawan', 'rudi@fashionhub.com', '021-87654321', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Jl. Sudirman No. 123', 'Jakarta', 'DKI Jakarta', '12190', 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=400', 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=800', 'Toko fashion terlengkap di Jakarta dengan koleksi pakaian pria dan wanita terbaru', 'active', NOW(), NOW()),
+(2, 'Trendy Clothes Bandung', 'Sari Indah', 'sari@trendyclothes.com', '022-98765432', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Jl. Braga No. 456', 'Bandung', 'Jawa Barat', '40111', 'https://images.unsplash.com/photo-1483985988355-763728e1935b?w=400', 'https://images.unsplash.com/photo-1483985988355-763728e1935b?w=800', 'Pakaian trendy dan stylish untuk semua kalangan dengan harga terjangkau', 'active', NOW(), NOW()),
+(3, 'Kids Paradise Surabaya', 'Bambang Wijaya', 'bambang@kidsparadise.com', '031-11223344', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Jl. Pemuda No. 789', 'Surabaya', 'Jawa Timur', '60271', 'https://images.unsplash.com/photo-1503944583220-79d8926ad5e2?w=400', 'https://images.unsplash.com/photo-1503944583220-79d8926ad5e2?w=800', 'Spesialis pakaian anak-anak dengan kualitas terbaik dan desain lucu', 'active', NOW(), NOW());
+
+-- Insert Products
+INSERT INTO products (id, seller_id, name, slug, section, category, price, description, images, stock, created_at, updated_at) VALUES
+-- Products from Fashion Hub Jakarta (Seller 1)
+(1, 1, 'Kemeja Formal Premium Pria', 'kemeja-formal-premium-pria', 'men', 'kemeja', 299000.00, 'Kemeja formal berkualitas tinggi dengan bahan katun premium, cocok untuk acara formal dan kantor', '["https://images.unsplash.com/photo-1594938328870-28be88cb6cd6?w=500", "https://images.unsplash.com/photo-1594938328870-28be88cb6cd6?w=500&bg=blue"]', 50, NOW(), NOW()),
+(2, 1, 'Kaos Casual Pria Modern', 'kaos-casual-pria-modern', 'men', 'kaos', 89000.00, 'Kaos casual dengan desain modern dan bahan yang nyaman untuk aktivitas sehari-hari', '["https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=500", "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=500&bg=gray"]', 75, NOW(), NOW()),
+(3, 1, 'Jaket Denim Stylish', 'jaket-denim-stylish', 'men', 'jaket', 459000.00, 'Jaket denim berkualitas dengan desain stylish dan tahan lama', '["https://images.unsplash.com/photo-1544966503-7cc5ac882d5f?w=500", "https://images.unsplash.com/photo-1544966503-7cc5ac882d5f?w=500&bg=blue"]', 30, NOW(), NOW()),
+(4, 1, 'Celana Chino Pria', 'celana-chino-pria', 'men', 'celana_panjang', 189000.00, 'Celana chino dengan potongan slim fit yang nyaman untuk berbagai ocasion', '["https://images.unsplash.com/photo-1473966968600-fa801b869a1a?w=500", "https://images.unsplash.com/photo-1473966968600-fa801b869a1a?w=500&bg=khaki"]', 60, NOW(), NOW()),
+(5, 1, 'Dress Wanita Elegan', 'dress-wanita-elegan', 'women', 'dress', 359000.00, 'Dress elegan dengan motif floral yang cocok untuk acara formal maupun semi-formal', '["https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=500", "https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=500&bg=pink"]', 40, NOW(), NOW()),
+(6, 1, 'Blouse Kerja Wanita', 'blouse-kerja-wanita', 'women', 'kemeja', 199000.00, 'Blouse kerja dengan desain professional dan bahan yang nyaman', '["https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?w=500", "https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?w=500&bg=white"]', 45, NOW(), NOW()),
+
+-- Products from Trendy Clothes Bandung (Seller 2)
+(7, 2, 'Hoodie Oversized Trendy', 'hoodie-oversized-trendy', 'men', 'hoodie', 279000.00, 'Hoodie oversized dengan desain trendy dan bahan fleece yang hangat', '["https://images.unsplash.com/photo-1556821840-3a9fbc8b009c?w=500", "https://images.unsplash.com/photo-1556821840-3a9fbc8b009c?w=500&bg=black"]', 35, NOW(), NOW()),
+(8, 2, 'Sweater Rajut Wanita', 'sweater-rajut-wanita', 'women', 'sweater', 229000.00, 'Sweater rajut dengan desain vintage dan kualitas premium', '["https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=500", "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=500&bg=cream"]', 50, NOW(), NOW()),
+(9, 2, 'Celana Pendek Denim', 'celana-pendek-denim', 'women', 'celana_pendek', 149000.00, 'Celana pendek denim dengan potongan high waist yang trendy', '["https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?w=500", "https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?w=500&bg=blue"]', 65, NOW(), NOW()),
+(10, 2, 'Rok Mini Plisket', 'rok-mini-plisket', 'women', 'rok', 179000.00, 'Rok mini dengan desain plisket yang cute dan feminine', '["https://images.unsplash.com/photo-1583496661160-fb5886a13c4e?w=500", "https://images.unsplash.com/photo-1583496661160-fb5886a13c4e?w=500&bg=pink"]', 40, NOW(), NOW()),
+(11, 2, 'Kaos Polo Pria', 'kaos-polo-pria', 'men', 'kaos', 119000.00, 'Kaos polo dengan kualitas premium dan desain yang timeless', '["https://images.unsplash.com/photo-1571945153237-4929e783af4a?w=500", "https://images.unsplash.com/photo-1571945153237-4929e783af4a?w=500&bg=navy"]', 55, NOW(), NOW()),
+(12, 2, 'Jaket Bomber Wanita', 'jaket-bomber-wanita', 'women', 'jaket', 329000.00, 'Jaket bomber dengan desain sporty dan bahan yang berkualitas', '["https://images.unsplash.com/photo-1544966503-7cc5ac882d5f?w=500", "https://images.unsplash.com/photo-1544966503-7cc5ac882d5f?w=500&bg=green"]', 25, NOW(), NOW()),
+
+-- Products from Kids Paradise Surabaya (Seller 3)
+(13, 3, 'Kaos Anak Karakter', 'kaos-anak-karakter', 'kids', 'kaos', 69000.00, 'Kaos anak dengan gambar karakter favorit, bahan cotton yang lembut', '["https://images.unsplash.com/photo-1503944583220-79d8926ad5e2?w=500", "https://images.unsplash.com/photo-1503944583220-79d8926ad5e2?w=500&bg=yellow"]', 80, NOW(), NOW()),
+(14, 3, 'Dress Anak Perempuan', 'dress-anak-perempuan', 'kids', 'dress', 129000.00, 'Dress anak dengan motif bunga-bunga yang lucu dan nyaman', '["https://images.unsplash.com/photo-1518831959646-742c3a14ebf7?w=500", "https://images.unsplash.com/photo-1518831959646-742c3a14ebf7?w=500&bg=pink"]', 60, NOW(), NOW()),
+(15, 3, 'Celana Pendek Anak Laki-laki', 'celana-pendek-anak-laki', 'kids', 'celana_pendek', 89000.00, 'Celana pendek anak dengan bahan yang nyaman untuk bermain', '["https://images.unsplash.com/photo-1503944583220-79d8926ad5e2?w=500", "https://images.unsplash.com/photo-1503944583220-79d8926ad5e2?w=500&bg=blue"]', 70, NOW(), NOW()),
+(16, 3, 'Hoodie Anak Unisex', 'hoodie-anak-unisex', 'kids', 'hoodie', 159000.00, 'Hoodie anak dengan desain unisex dan bahan yang hangat', '["https://images.unsplash.com/photo-1503944583220-79d8926ad5e2?w=500", "https://images.unsplash.com/photo-1503944583220-79d8926ad5e2?w=500&bg=orange"]', 45, NOW(), NOW()),
+(17, 3, 'Kemeja Anak Formal', 'kemeja-anak-formal', 'kids', 'kemeja', 119000.00, 'Kemeja anak untuk acara formal dengan kualitas terbaik', '["https://images.unsplash.com/photo-1503944583220-79d8926ad5e2?w=500", "https://images.unsplash.com/photo-1503944583220-79d8926ad5e2?w=500&bg=white"]', 35, NOW(), NOW()),
+(18, 3, 'Rok Anak Cute', 'rok-anak-cute', 'kids', 'rok', 99000.00, 'Rok anak dengan desain yang cute dan warna-warna cerah', '["https://images.unsplash.com/photo-1518831959646-742c3a14ebf7?w=500", "https://images.unsplash.com/photo-1518831959646-742c3a14ebf7?w=500&bg=purple"]', 55, NOW(), NOW()),
+
+-- Additional Products to reach more variety
+(19, 1, 'Celana Jeans Pria Slim', 'celana-jeans-pria-slim', 'men', 'celana_panjang', 259000.00, 'Celana jeans dengan potongan slim fit yang stylish', '["https://images.unsplash.com/photo-1473966968600-fa801b869a1a?w=500", "https://images.unsplash.com/photo-1473966968600-fa801b869a1a?w=500&bg=indigo"]', 40, NOW(), NOW()),
+(20, 2, 'Celana Pendek Pria Casual', 'celana-pendek-pria-casual', 'men', 'celana_pendek', 129000.00, 'Celana pendek casual untuk aktivitas santai', '["https://images.unsplash.com/photo-1506629905607-0e0fd1916871?w=500", "https://images.unsplash.com/photo-1506629905607-0e0fd1916871?w=500&bg=khaki"]', 50, NOW(), NOW());
+
+-- Insert Addresses
+INSERT INTO addresses (id, user_id, label, recipient_name, phone, full_address, city, state, postal_code, is_primary, created_at, updated_at) VALUES
+(1, 1, 'Rumah', 'Ahmad Rizki', '081234567890', 'Jl. Merdeka No. 123, RT 05/RW 02, Kelurahan Menteng', 'Jakarta', 'DKI Jakarta', '10310', true, NOW(), NOW()),
+(2, 1, 'Kantor', 'Ahmad Rizki', '081234567890', 'Jl. Sudirman No. 456, Lantai 10, Gedung Plaza Indonesia', 'Jakarta', 'DKI Jakarta', '10220', false, NOW(), NOW()),
+(3, 2, 'Rumah', 'Siti Nurhaliza', '081234567891', 'Jl. Braga No. 789, RT 03/RW 01, Kelurahan Braga', 'Bandung', 'Jawa Barat', '40111', true, NOW(), NOW()),
+(4, 2, 'Kost', 'Siti Nurhaliza', '081234567891', 'Jl. Dago No. 321, Kost Putri Melati', 'Bandung', 'Jawa Barat', '40135', false, NOW(), NOW()),
+(5, 3, 'Rumah', 'Budi Santoso', '081234567892', 'Jl. Pemuda No. 654, RT 02/RW 03, Kelurahan Gubeng', 'Surabaya', 'Jawa Timur', '60271', true, NOW(), NOW()),
+(6, 3, 'Kantor', 'Budi Santoso', '081234567892', 'Jl. Tunjungan No. 987, Gedung Perkantoran Tunjungan Plaza', 'Surabaya', 'Jawa Timur', '60261', false, NOW(), NOW()),
+(7, 4, 'Rumah', 'Dewi Lestari', '081234567893', 'Jl. Malioboro No. 147, RT 01/RW 02, Kelurahan Sosromenduran', 'Yogyakarta', 'DI Yogyakarta', '55271', true, NOW(), NOW()),
+(8, 5, 'Rumah', 'Andi Pratama', '081234567894', 'Jl. Pahlawan No. 258, RT 04/RW 01, Kelurahan Kesawan', 'Medan', 'Sumatera Utara', '20111', true, NOW(), NOW());
+
+-- Insert Favorites
+INSERT INTO favorites (id, user_id, product_id, created_at, updated_at) VALUES
+(1, 1, 1, NOW(), NOW()),
+(2, 1, 5, NOW(), NOW()),
+(3, 1, 7, NOW(), NOW()),
+(4, 2, 2, NOW(), NOW()),
+(5, 2, 8, NOW(), NOW()),
+(6, 2, 13, NOW(), NOW()),
+(7, 3, 3, NOW(), NOW()),
+(8, 3, 9, NOW(), NOW()),
+(9, 4, 4, NOW(), NOW()),
+(10, 4, 10, NOW(), NOW()),
+(11, 5, 6, NOW(), NOW()),
+(12, 6, 12, NOW(), NOW());
+
+-- Insert Carts
+INSERT INTO carts (id, user_id, product_id, quantity, price, created_at, updated_at) VALUES
+(1, 1, 1, 2, 299000.00, NOW(), NOW()),
+(2, 1, 5, 1, 359000.00, NOW(), NOW()),
+(3, 2, 7, 1, 279000.00, NOW(), NOW()),
+(4, 2, 13, 3, 69000.00, NOW(), NOW()),
+(5, 3, 3, 1, 459000.00, NOW(), NOW()),
+(6, 3, 9, 2, 149000.00, NOW(), NOW()),
+(7, 4, 10, 1, 179000.00, NOW(), NOW()),
+(8, 5, 6, 1, 199000.00, NOW(), NOW()),
+(9, 6, 12, 1, 329000.00, NOW(), NOW());
+
+-- Insert Orders
+INSERT INTO orders (id, user_id, order_id, status, order_status, total_amount, shipping_cost, tax_cost, shipping_method, shipping_address, payment_type, notes, paid_at, confirmed_at, created_at, updated_at) VALUES
+(1, 1, 'ORD-2025-001', 'paid', 'dikonfirmasi', 658000.00, 15000.00, 32900.00, 'JNE Regular', 'Jl. Merdeka No. 123, RT 05/RW 02, Kelurahan Menteng, Jakarta, DKI Jakarta 10310', 'bank_transfer', 'Mohon dikirim dengan packaging yang rapi', NOW() - INTERVAL 2 DAY, NOW() - INTERVAL 1 DAY, NOW() - INTERVAL 3 DAY, NOW()),
+(2, 2, 'ORD-2025-002', 'paid', 'diproses', 486000.00, 20000.00, 24300.00, 'JNE Express', 'Jl. Braga No. 789, RT 03/RW 01, Kelurahan Braga, Bandung, Jawa Barat 40111', 'e_wallet', 'Tolong hubungi sebelum pengiriman', NOW() - INTERVAL 1 DAY, NOW(), NOW() - INTERVAL 2 DAY, NOW()),
+(3, 3, 'ORD-2025-003', 'paid', 'dikirim', 757000.00, 25000.00, 37850.00, 'Sicepat Reguler', 'Jl. Pemuda No. 654, RT 02/RW 03, Kelurahan Gubeng, Surabaya, Jawa Timur 60271', 'credit_card', NULL, NOW() - INTERVAL 3 DAY, NOW() - INTERVAL 2 DAY, NOW() - INTERVAL 4 DAY, NOW()),
+(4, 4, 'ORD-2025-004', 'paid', 'selesai', 194000.00, 18000.00, 9700.00, 'JNT Express', 'Jl. Malioboro No. 147, RT 01/RW 02, Kelurahan Sosromenduran, Yogyakarta, DI Yogyakarta 55271', 'bank_transfer', 'Terima kasih', NOW() - INTERVAL 7 DAY, NOW() - INTERVAL 6 DAY, NOW() - INTERVAL 8 DAY, NOW()),
+(5, 5, 'ORD-2025-005', 'paid', 'dikonfirmasi', 214000.00, 22000.00, 10700.00, 'Pos Indonesia', 'Jl. Pahlawan No. 258, RT 04/RW 01, Kelurahan Kesawan, Medan, Sumatera Utara 20111', 'e_wallet', 'Pengiriman standar saja', NOW() - INTERVAL 1 DAY, NOW(), NOW() - INTERVAL 2 DAY, NOW()),
+(6, 6, 'ORD-2025-006', 'pending', 'menunggu_konfirmasi', 354000.00, 15000.00, 17700.00, 'JNE Regular', 'Jl. Sunset Road No. 999, Denpasar, Bali 80117', NULL, 'Mohon konfirmasi ketersediaan barang', NULL, NULL, NOW() - INTERVAL 1 HOUR, NOW()),
+(7, 1, 'ORD-2025-007', 'paid', 'selesai', 318000.00, 12000.00, 15900.00, 'JNE Regular', 'Jl. Merdeka No. 123, RT 05/RW 02, Kelurahan Menteng, Jakarta, DKI Jakarta 10310', 'credit_card', 'Barang sudah diterima dengan baik', NOW() - INTERVAL 12 DAY, NOW() - INTERVAL 11 DAY, NOW() - INTERVAL 14 DAY, NOW()),
+(8, 2, 'ORD-2025-008', 'paid', 'selesai', 228000.00, 18000.00, 11400.00, 'Sicepat Regular', 'Jl. Braga No. 789, RT 03/RW 01, Kelurahan Braga, Bandung, Jawa Barat 40111', 'bank_transfer', 'Kualitas bagus, pengiriman cepat', NOW() - INTERVAL 10 DAY, NOW() - INTERVAL 9 DAY, NOW() - INTERVAL 12 DAY, NOW()),
+(9, 3, 'ORD-2025-009', 'paid', 'selesai', 547000.00, 25000.00, 27350.00, 'JNT Express', 'Jl. Pemuda No. 654, RT 02/RW 03, Kelurahan Gubeng, Surabaya, Jawa Timur 60271', 'e_wallet', 'Produk sesuai ekspektasi', NOW() - INTERVAL 15 DAY, NOW() - INTERVAL 14 DAY, NOW() - INTERVAL 17 DAY, NOW()),
+(10, 4, 'ORD-2025-010', 'paid', 'selesai', 458000.00, 20000.00, 22900.00, 'JNE Express', 'Jl. Malioboro No. 147, RT 01/RW 02, Kelurahan Sosromenduran, Yogyakarta, DI Yogyakarta 55271', 'credit_card', 'Sangat puas dengan pelayanan', NOW() - INTERVAL 20 DAY, NOW() - INTERVAL 19 DAY, NOW() - INTERVAL 22 DAY, NOW()),
+(11, 5, 'ORD-2025-011', 'paid', 'selesai', 298000.00, 15000.00, 14900.00, 'Pos Indonesia', 'Jl. Pahlawan No. 258, RT 04/RW 01, Kelurahan Kesawan, Medan, Sumatera Utara 20111', 'bank_transfer', 'Packaging rapi, terima kasih', NOW() - INTERVAL 8 DAY, NOW() - INTERVAL 7 DAY, NOW() - INTERVAL 10 DAY, NOW()),
+(12, 6, 'ORD-2025-012', 'paid', 'selesai', 377000.00, 22000.00, 18850.00, 'JNE Regular', 'Jl. Sunset Road No. 999, Denpasar, Bali 80117', 'e_wallet', 'Kualitas premium, worth it', NOW() - INTERVAL 18 DAY, NOW() - INTERVAL 17 DAY, NOW() - INTERVAL 20 DAY, NOW()),
+(13, 1, 'ORD-2025-013', 'paid', 'selesai', 208000.00, 12000.00, 10400.00, 'Sicepat Regular', 'Jl. Merdeka No. 123, RT 05/RW 02, Kelurahan Menteng, Jakarta, DKI Jakarta 10310', 'bank_transfer', 'Sudah langganan di sini', NOW() - INTERVAL 25 DAY, NOW() - INTERVAL 24 DAY, NOW() - INTERVAL 27 DAY, NOW()),
+(14, 2, 'ORD-2025-014', 'paid', 'selesai', 428000.00, 18000.00, 21400.00, 'JNT Express', 'Jl. Braga No. 789, RT 03/RW 01, Kelurahan Braga, Bandung, Jawa Barat 40111', 'credit_card', 'Recommended seller', NOW() - INTERVAL 30 DAY, NOW() - INTERVAL 29 DAY, NOW() - INTERVAL 32 DAY, NOW()),
+(15, 3, 'ORD-2025-015', 'paid', 'selesai', 187000.00, 15000.00, 9350.00, 'JNE Regular', 'Jl. Pemuda No. 654, RT 02/RW 03, Kelurahan Gubeng, Surabaya, Jawa Timur 60271', 'e_wallet', 'Anak saya suka sekali', NOW() - INTERVAL 35 DAY, NOW() - INTERVAL 34 DAY, NOW() - INTERVAL 37 DAY, NOW()),
+(16, 4, 'ORD-2025-016', 'paid', 'selesai', 348000.00, 20000.00, 17400.00, 'Sicepat Express', 'Jl. Malioboro No. 147, RT 01/RW 02, Kelurahan Sosromenduran, Yogyakarta, DI Yogyakarta 55271', 'bank_transfer', 'Bahan berkualitas tinggi', NOW() - INTERVAL 40 DAY, NOW() - INTERVAL 39 DAY, NOW() - INTERVAL 42 DAY, NOW()),
+(17, 5, 'ORD-2025-017', 'paid', 'selesai', 268000.00, 18000.00, 13400.00, 'JNE Express', 'Jl. Pahlawan No. 258, RT 04/RW 01, Kelurahan Kesawan, Medan, Sumatera Utara 20111', 'credit_card', 'Pelayanan sangat memuaskan', NOW() - INTERVAL 45 DAY, NOW() - INTERVAL 44 DAY, NOW() - INTERVAL 47 DAY, NOW()),
+(18, 6, 'ORD-2025-018', 'paid', 'selesai', 158000.00, 15000.00, 7900.00, 'Pos Indonesia', 'Jl. Sunset Road No. 999, Denpasar, Bali 80117', 'e_wallet', 'Ukuran pas, model bagus', NOW() - INTERVAL 50 DAY, NOW() - INTERVAL 49 DAY, NOW() - INTERVAL 52 DAY, NOW()),
+(19, 1, 'ORD-2025-019', 'paid', 'selesai', 588000.00, 25000.00, 29400.00, 'JNT Express', 'Jl. Merdeka No. 123, RT 05/RW 02, Kelurahan Menteng, Jakarta, DKI Jakarta 10310', 'bank_transfer', 'Pembelian untuk keluarga', NOW() - INTERVAL 55 DAY, NOW() - INTERVAL 54 DAY, NOW() - INTERVAL 57 DAY, NOW()),
+(20, 2, 'ORD-2025-020', 'paid', 'selesai', 118000.00, 12000.00, 5900.00, 'JNE Regular', 'Jl. Braga No. 789, RT 03/RW 01, Kelurahan Braga, Bandung, Jawa Barat 40111', 'credit_card', 'Simple tapi berkualitas', NOW() - INTERVAL 60 DAY, NOW() - INTERVAL 59 DAY, NOW() - INTERVAL 62 DAY, NOW());
+
+-- Insert Order Items
+INSERT INTO order_items (id, order_id, product_id, quantity, price, created_at, updated_at) VALUES
+-- Order 1 items
+(1, 1, 1, 2, 299000.00, NOW(), NOW()),
+(2, 1, 5, 1, 359000.00, NOW(), NOW()),
+-- Order 2 items
+(3, 2, 7, 1, 279000.00, NOW(), NOW()),
+(4, 2, 13, 3, 69000.00, NOW(), NOW()),
+-- Order 3 items
+(5, 3, 3, 1, 459000.00, NOW(), NOW()),
+(6, 3, 9, 2, 149000.00, NOW(), NOW()),
+-- Order 4 items
+(7, 4, 10, 1, 179000.00, NOW(), NOW()),
+-- Order 5 items
+(8, 5, 6, 1, 199000.00, NOW(), NOW()),
+-- Order 6 items
+(9, 6, 12, 1, 329000.00, NOW(), NOW()),
+-- Order 7 items
+(10, 7, 2, 2, 89000.00, NOW(), NOW()),
+(11, 7, 4, 1, 189000.00, NOW(), NOW()),
+-- Order 8 items
+(12, 8, 8, 1, 229000.00, NOW(), NOW()),
+-- Order 9 items
+(13, 9, 1, 1, 299000.00, NOW(), NOW()),
+(14, 9, 11, 2, 119000.00, NOW(), NOW()),
+-- Order 10 items
+(15, 10, 3, 1, 459000.00, NOW(), NOW()),
+-- Order 11 items
+(16, 11, 7, 1, 279000.00, NOW(), NOW()),
+-- Order 12 items
+(17, 12, 5, 1, 359000.00, NOW(), NOW()),
+-- Order 13 items
+(18, 13, 15, 2, 89000.00, NOW(), NOW()),
+-- Order 14 items
+(19, 14, 1, 1, 299000.00, NOW(), NOW()),
+(20, 14, 4, 1, 189000.00, NOW(), NOW()),
+-- Order 15 items
+(21, 15, 14, 1, 129000.00, NOW(), NOW()),
+-- Order 16 items
+(22, 16, 8, 1, 229000.00, NOW(), NOW()),
+(23, 16, 2, 1, 89000.00, NOW(), NOW()),
+-- Order 17 items
+(24, 17, 11, 2, 119000.00, NOW(), NOW()),
+-- Order 18 items
+(25, 18, 13, 2, 69000.00, NOW(), NOW()),
+-- Order 19 items
+(26, 19, 1, 1, 299000.00, NOW(), NOW()),
+(27, 19, 7, 1, 279000.00, NOW(), NOW()),
+-- Order 20 items
+(28, 20, 15, 1, 89000.00, NOW(), NOW());
+
+-- Insert Product Ratings (only for completed orders)
+INSERT INTO product_ratings (id, user_id, product_id, rating, ulasan, order_id, created_at, updated_at) VALUES
+-- Order 7 ratings
+(2, 1, 2, 4, 'Kaos casual yang nyaman banget! Bahan cotton premium dan tidak mudah berbulu. Ukuran sesuai dengan size chart. Puas dengan pembelian ini.', 7, NOW(), NOW()),
+(3, 1, 4, 5, 'Celana chino dengan kualitas terbaik! Potongan slim fit yang pas dan bahan yang tidak mudah kusut. Sangat recommended untuk daily wear.', 7, NOW(), NOW()),
+-- Order 8 ratings
+(4, 2, 8, 5, 'Sweater rajut yang sangat bagus! Desain vintage yang unik dan bahan yang hangat. Cocok untuk cuaca dingin. Seller responsif dan pengiriman cepat.', 8, NOW(), NOW()),
+-- Order 9 ratings
+(5, 3, 1, 4, 'Kemeja formal yang berkualitas. Bahan katun premium dan jahitan yang rapi. Cocok untuk ke kantor atau acara formal. Sedikit kecil di bagian lengan.', 9, NOW(), NOW()),
+(6, 3, 11, 5, 'Kaos polo yang sangat nyaman! Bahan tidak mudah melar dan warna tidak mudah pudar. Desain timeless yang cocok untuk berbagai ocasion.', 9, NOW(), NOW()),
+-- Order 10 ratings
+(7, 4, 3, 5, 'Jaket denim yang keren banget! Kualitas bahan sangat baik dan modelnya timeless. Sangat puas dengan pembelian ini, worth it untuk harga segini.', 10, NOW(), NOW()),
+-- Order 11 ratings
+(8, 5, 7, 5, 'Hoodie oversized yang sangat nyaman! Bahan fleece yang tebal dan hangat. Desain trendy yang cocok untuk anak muda. Highly recommended!', 11, NOW(), NOW()),
+(27, 5, 6, 4, 'Blouse kerja dengan desain professional. Bahan yang nyaman dan tidak mudah kusut. Cocok untuk ke kantor. Pengiriman sesuai estimasi.', 11, NOW(), NOW()),
+-- Order 12 ratings
+(9, 6, 5, 4, 'Dress elegan dengan motif floral yang cantik. Bahan tidak mudah kusut dan nyaman dipakai. Cocok untuk acara formal. Pengiriman sedikit lama.', 12, NOW(), NOW()),
+(28, 6, 12, 5, 'Jaket bomber dengan desain sporty yang keren! Bahan berkualitas dan modelnya trendy. Cocok untuk berbagai gaya outfit. Highly recommended!', 12, NOW(), NOW()),
+-- Order 13 ratings
+(10, 1, 15, 5, 'Celana pendek anak yang bagus! Bahan nyaman dan tidak mudah sobek. Anak saya suka sekali memakainya untuk bermain. Recommended!', 13, NOW(), NOW()),
+-- Order 14 ratings
+(11, 2, 1, 5, 'Kemeja formal premium yang sangat berkualitas! Bahan katun yang halus dan jahitan yang rapi. Cocok untuk meeting dan acara formal.', 14, NOW(), NOW()),
+(12, 2, 4, 4, 'Celana chino dengan kualitas bagus. Potongan slim fit yang pas dan bahan yang nyaman. Warna sesuai dengan foto. Pengiriman cepat.', 14, NOW(), NOW()),
+-- Order 15 ratings
+(13, 3, 14, 5, 'Dress anak yang sangat lucu! Motif bunga-bunganya cantik dan bahan yang lembut. Anak perempuan saya sangat suka. Kualitas jahitan bagus.', 15, NOW(), NOW()),
+-- Order 16 ratings
+(14, 4, 8, 4, 'Sweater rajut yang bagus dengan desain vintage. Bahan hangat dan nyaman dipakai. Cocok untuk cuaca dingin. Ukuran sesuai dengan deskripsi.', 16, NOW(), NOW()),
+(29, 4, 2, 4, 'Kaos casual yang nyaman untuk aktivitas sehari-hari. Bahan cotton yang lembut dan tidak mudah berbulu. Ukuran pas dan warna sesuai foto.', 16, NOW(), NOW()),
+-- Order 17 ratings
+(16, 5, 11, 5, 'Kaos polo dengan kualitas premium! Bahan tidak mudah berbulu dan warna tidak mudah pudar. Desain yang timeless. Sangat puas dengan pembelian ini.', 17, NOW(), NOW()),
+-- Order 18 ratings
+(17, 6, 13, 4, 'Kaos anak dengan gambar karakter yang lucu. Bahan cotton yang lembut dan tidak mudah luntur. Anak saya suka sekali. Ukuran pas.', 18, NOW(), NOW()),
+-- Order 19 ratings
+(18, 1, 1, 5, 'Kemeja formal yang sangat berkualitas! Sudah beli beberapa kali dan selalu puas. Bahan premium dan jahitan rapi. Highly recommended!', 19, NOW(), NOW()),
+(19, 1, 7, 5, 'Hoodie oversized yang keren! Bahan fleece yang tebal dan hangat. Desain yang trendy dan nyaman dipakai. Cocok untuk cuaca dingin.', 19, NOW(), NOW()),
+-- Order 20 ratings
+(20, 2, 15, 4, 'Celana pendek anak dengan kualitas bagus. Bahan nyaman dan tidak mudah robek. Cocok untuk aktivitas bermain anak. Harga terjangkau.', 20, NOW(), NOW()),
+-- Additional unique ratings
+(21, 4, 1, 5, 'Kemeja formal yang sangat bagus! Bahan katun premium dan potongan yang pas. Sudah beberapa kali beli dan selalu puas. Recommended seller!', 4, NOW(), NOW()),
+(22, 1, 5, 5, 'Dress elegan yang sangat cantik! Motif floralnya indah dan bahan yang berkualitas. Cocok untuk berbagai acara formal. Sangat puas!', 7, NOW(), NOW()),
+(23, 2, 7, 5, 'Hoodie oversized yang sangat nyaman! Bahan fleece yang tebal dan desain yang trendy. Cocok untuk anak muda. Packaging rapi dan pengiriman cepat.', 8, NOW(), NOW()),
+(24, 2, 13, 4, 'Kaos anak dengan karakter yang lucu. Bahan cotton yang lembut dan gambar tidak mudah luntur. Anak saya sangat suka. Ukuran sesuai chart.', 8, NOW(), NOW()),
+(25, 3, 3, 5, 'Jaket denim dengan kualitas premium! Bahan yang tahan lama dan modelnya timeless. Sangat puas dengan pembelian ini. Worth every penny!', 9, NOW(), NOW()),
+(26, 3, 9, 4, 'Celana pendek denim dengan potongan high waist yang bagus. Bahan tidak kaku dan nyaman dipakai. Cocok untuk outfit casual sehari-hari.', 9, NOW(), NOW());

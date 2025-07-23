@@ -1,5 +1,5 @@
 @extends('layouts.app')
-@section('title', $product->name . ' - ThriftHub')
+@section('title', $product->name . ' - Vinskanna')
 @section('content')
     <div class="max-w-7xl mx-auto px-4 py-8">
         <!-- Breadcrumb -->

@@ -29,7 +29,7 @@
                         <a href="{{ route('dashboard') }}">
                             <h1
                                 class="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent cursor-pointer">
-                                ThriftHub
+                                Vinskanna
                             </h1>
                         </a>
                     </div>

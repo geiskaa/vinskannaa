@@ -17,6 +17,29 @@ use Str;
 class SellerController extends Controller
 {
 
+    public function logout(Request $request)
+    {
+        $seller = Auth::guard('seller')->user();
+
+        // Logging informasi seller yang logout
+        Log::info('Seller logged out', [
+            'guard' => 'seller',
+            'id' => $seller->id,
+            'email' => $seller->email ?? null,
+            'name' => $seller->name ?? null,
+        ]);
+
+        // Logout dari guard seller
+        Auth::guard('seller')->logout();
+
+        // Invalidate session dan regenerate CSRF token
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        // Redirect ke halaman login seller
+        return redirect()->route('login')->with('success', 'You have been logged out successfully.');
+    }
+
     public function dashboardData(Request $request)
     {
         // Check if this is an AJAX request

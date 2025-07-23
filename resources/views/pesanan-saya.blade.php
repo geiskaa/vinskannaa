@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Pesanan Saya - ThriftHub')
+@section('title', 'Pesanan Saya - Vinskanna')
 
 @section('content')
     <div class="max-w-7xl mx-auto px-4 py-8">
@@ -406,10 +406,12 @@
                                                 </svg>
                                                 {{ $favorite->product->stock !== null && $favorite->product->stock <= 0 ? 'Habis' : 'Keranjang' }}
                                             </button>
-                                            <button onclick="viewProduct('{{ $favorite->product->id }}')"
-                                                class="cursor-pointer  px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50">
+                                            <button
+                                                onclick="window.location.href = '/products/{{ $favorite->product->slug }}'"
+                                                class="cursor-pointer px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50">
                                                 Lihat
                                             </button>
+
                                         </div>
                                     </div>
                                 </div>

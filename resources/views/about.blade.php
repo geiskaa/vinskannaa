@@ -1,18 +1,18 @@
 {{-- resources/views/about.blade.php --}}
 @extends('layouts.app')
 
-@section('title', 'Tentang - ThriftHub')
+@section('title', 'Tentang - Vinskanna')
 
 @section('content')
     <div class="max-w-7xl mx-auto px-4 py-8">
         <!-- Hero Section -->
         <div class="text-center mb-16">
-            <h1 class="text-4xl md:text-6xl font-bold text-gray-900 mb-6">THRIFTHUB</h1>
+            <h1 class="text-4xl md:text-6xl font-bold text-gray-900 mb-6">Vinskanna</h1>
             <p class="text-lg text-gray-600 max-w-4xl mx-auto leading-relaxed">
-                ThriftHub adalah aplikasi berbasis web yang menyediakan platform jual beli produk thrift
-                atau barang bekas berkualitas seperti pakaian, sepatu, tas, dan aksesoris. Aplikasi ini
+                Vinskanna adalah aplikasi berbasis web yang menyediakan platform jual beli produk florist
+                seperti bunga segar, buket, tanaman hias, dan aksesoris dekoratif lainnya. Aplikasi ini
                 dirancang untuk memudahkan proses transaksi antara penjual (admin) dan pembeli,
-                sekaligus meningkatkan pengalaman belanja produk second-hand secara aman, nyaman,
+                sekaligus meningkatkan pengalaman belanja produk florist secara aman, nyaman,
                 dan efisien.
             </p>
         </div>
@@ -190,7 +190,7 @@
         <div class="text-center">
             <h2 class="text-3xl font-bold text-gray-900 mb-4">Bergabunglah dengan Komunitas Kami</h2>
             <p class="text-lg text-gray-600 mb-8 max-w-2xl mx-auto">
-                Mulai berbelanja produk thrift berkualitas dan dukung gerakan fashion berkelanjutan bersama ThriftHub.
+                Mulai berbelanja produk thrift berkualitas dan dukung gerakan fashion berkelanjutan bersama Vinskanna.
             </p>
             <a href="/dashboard"
                 class="inline-flex items-center space-x-2 bg-gray-900 text-white px-8 py-3 rounded-lg hover:bg-gray-800 transition-colors">

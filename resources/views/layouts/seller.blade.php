@@ -65,14 +65,15 @@
                                 </svg>
                             </button>
 
-                            <div x-show="open" @click.away="open = false"
+                            <div x-show="open" @click.away="open = false" x-cloak
                                 x-transition:enter="transition ease-out duration-200"
                                 x-transition:enter-start="opacity-0 scale-95"
                                 x-transition:enter-end="opacity-100 scale-100"
                                 class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50">
-                                <form method="POST" action="{{ route('logout') }}">
+                                <form method="POST"
+                                    action="{{ Auth::guard('seller')->check() ? route('seller.logout') : route('logout') }}">
                                     @csrf
-                                    <button type="submit"
+                                    <button type="submit" @click="open = false"
                                         class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left">
                                         <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor"
                                             viewBox="0 0 24 24">
@@ -83,8 +84,8 @@
                                         LOG OUT
                                     </button>
                                 </form>
-
                             </div>
+
                         </div>
                     </div>
                 </div>

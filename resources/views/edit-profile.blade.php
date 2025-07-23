@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Edit Profile - ThriftHub')
+@section('title', 'Edit Profile - Vinskanna')
 
 @section('content')
     <div class="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 py-8">

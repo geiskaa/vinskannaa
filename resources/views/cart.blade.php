@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Keranjang Belanja - ThriftHub')
+@section('title', 'Keranjang Belanja - Vinskanna')
 
 @section('content')
     <div class="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">

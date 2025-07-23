@@ -42,9 +42,6 @@ Route::middleware(['auth:web'])->group(function () {
     Route::get('/dashboard', [ProductController::class, 'index'])->name('dashboard');
     Route::get('/about', fn() => view('about'))->name('about');
 
-    // Logout
-    Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
-
     // Favorites
     Route::post('/favorites/{product}/toggle', [ProductController::class, 'toggle'])->name('favorites.toggle');
     Route::delete('/favorites/{id}', [OrderController::class, 'removeFavorite'])->name('favorites.remove');
@@ -82,11 +79,19 @@ Route::middleware(['auth:web'])->group(function () {
     Route::get('/search', [ProductController::class, 'search'])->name('search');
 });
 
+Route::middleware('auth')->group(function () {
+    Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+});
+Route::get('/seller/dashboard', function () {
+    dd(Auth::guard('seller')->check());
+})->middleware('auth:seller');
+
 Route::prefix('seller')->name('seller.')->middleware('auth:seller')->group(function () {
 
     // Dashboard
     Route::get('/dashboard', [SellerController::class, 'dashboard'])->name('dashboard');
     Route::get('/dashboard/data', [SellerController::class, 'dashboardData'])->name('dashboard.data');
+    Route::post('/seller/logout', [SellerController::class, 'logout'])->name('logout');
 
     // Produk
     Route::get('/all-produk', [SellerController::class, 'allProduk'])->name('all-produk');
