@@ -73,14 +73,21 @@
 
                             <!-- Section -->
                             <div>
-                                <label for="section" class="block text-sm font-medium text-gray-700 mb-2">Bagian</label>
+                                <label for="section" class="block text-sm font-medium text-gray-700 mb-2">Segmen</label>
                                 <select name="section" id="section"
                                     class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-800 focus:border-transparent @error('section') border-red-500 @enderror">
-                                    <option value="">Pilih Bagian</option>
+                                    {{-- Ubah Segmentasi Disini --}}
+                                    <option value="">Pilih Segmentasi</option>
+                                {{-- File Asli Disini ygy
                                     <option value="men" {{ old('section') == 'men' ? 'selected' : '' }}>Pria</option>
                                     <option value="women" {{ old('section') == 'women' ? 'selected' : '' }}>Wanita</option>
-                                    <option value="kids" {{ old('section') == 'kids' ? 'selected' : '' }}>Anak-anak
-                                    </option>
+                                    <option value="kids" {{ old('section') == 'kids' ? 'selected' : '' }}>Anak-anak</option>
+                                --}}
+
+                                {{-- Disini kalau mau ganti Segmentasi --}}
+                                    <option value="Best Seller" {{ old('section') == 'Best Seller' ? 'selected' : '' }}>Best Seller</option>
+                                    <option value="Flashsale" {{ old('section') == 'Flashsale' ? 'selected' : '' }}>Flashsale</option>
+                                    <option value="New Collection" {{ old('section') == 'New Collection' ? 'selected' : '' }}>New Collection</option>
                                 </select>
                                 @error('section')
                                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -92,23 +99,26 @@
                                 <label for="category" class="block text-sm font-medium text-gray-700 mb-2">Kategori</label>
                                 <select name="category" id="category"
                                     class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-800 focus:border-transparent @error('category') border-red-500 @enderror">
+
+                                    {{-- File Asli Disini ygy --}}
+                                    {{--
                                     <option value="">Pilih Kategori</option>
-                                    <option value="kemeja" {{ old('category') == 'kemeja' ? 'selected' : '' }}>Kemeja
-                                    </option>
+                                    <option value="kemeja" {{ old('category') == 'kemeja' ? 'selected' : '' }}>Kemeja</option>
                                     <option value="kaos" {{ old('category') == 'kaos' ? 'selected' : '' }}>Kaos</option>
-                                    <option value="jaket" {{ old('category') == 'jaket' ? 'selected' : '' }}>Jaket
-                                    </option>
-                                    <option value="celana_panjang"
-                                        {{ old('category') == 'celana_panjang' ? 'selected' : '' }}>Celana Panjang</option>
-                                    <option value="celana_pendek"
-                                        {{ old('category') == 'celana_pendek' ? 'selected' : '' }}>Celana Pendek</option>
-                                    <option value="hoodie" {{ old('category') == 'hoodie' ? 'selected' : '' }}>Hoodie
-                                    </option>
-                                    <option value="dress" {{ old('category') == 'dress' ? 'selected' : '' }}>Dress
-                                    </option>
+                                    <option value="jaket" {{ old('category') == 'jaket' ? 'selected' : '' }}>Jaket</option>
+                                    <option value="celana_panjang" {{ old('category') == 'celana_panjang' ? 'selected' : '' }}>Celana Panjang</option>
+                                    <option value="celana_pendek" {{ old('category') == 'celana_pendek' ? 'selected' : '' }}>Celana Pendek</option>
+                                    <option value="hoodie" {{ old('category') == 'hoodie' ? 'selected' : '' }}>Hoodie</option>
+                                    <option value="dress" {{ old('category') == 'dress' ? 'selected' : '' }}>Dress</option>
                                     <option value="rok" {{ old('category') == 'rok' ? 'selected' : '' }}>Rok</option>
-                                    <option value="sweater" {{ old('category') == 'sweater' ? 'selected' : '' }}>Sweater
-                                    </option>
+                                    <option value="sweater" {{ old('category') == 'sweater' ? 'selected' : '' }}>Sweater</option>
+                                    --}}
+                                    {{-- Disini kalau mau ganti Kategori --}}
+                                    <option value="">Pilih Kategori</option>
+                                    <option value="Boquete" {{ old('category') == 'Boquete' ? 'selected' : '' }}>Boquete</option>
+                                    <option value="Tanaman Hias" {{ old('category') == 'Tanaman Hias' ? 'selected' : '' }}>Tanaman Hias</option>
+                                    <option value="Bingkai" {{ old('category') == 'Bingkai' ? 'selected' : '' }}>Bingkai</option>
+
                                 </select>
                                 @error('category')
                                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -203,9 +213,9 @@
                         const imageContainer = document.createElement('div');
                         imageContainer.className = 'relative group';
                         imageContainer.innerHTML = `
-                            <img src="${e.target.result}" alt="Preview ${index + 1}" 
+                            <img src="${e.target.result}" alt="Preview ${index + 1}"
                                 class="w-full h-24 object-cover rounded-lg border border-gray-200">
-                            <button type="button" onclick="removeImage(${index})" 
+                            <button type="button" onclick="removeImage(${index})"
                                 class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600 transition-colors">
                                 ×
                             </button>
