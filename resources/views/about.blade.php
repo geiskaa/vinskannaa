@@ -39,7 +39,7 @@
 
             <!-- Image 3 -->
             <div class="relative overflow-hidden rounded-lg shadow-md group">
-                <img src="https://images.unsplash.com/photo-1445205170230-053b83016050?w=400&h=600&fit=crop"
+                <img src="https://images.unsplash.com/premium_photo-1676997843530-0a1f6ab99d30?w=400&h=600&fit=crop"
                     alt="White Thrift Pants"
                     class="w-full h-80 object-cover group-hover:scale-105 transition-transform duration-500">
                 <div class="absolute inset-0 bg-black bg-opacity-20 group-hover:bg-opacity-30 transition-all duration-300">
@@ -67,28 +67,28 @@
                             viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                         </svg>
-                        <span>Memberikan platform yang mudah dan aman untuk jual beli produk thrift berkualitas</span>
+                        <span>Memberikan platform yang mudah dan aman untuk jual beli produk florist yang berkualitas</span>
                     </li>
                     <li class="flex items-start space-x-3">
                         <svg class="w-6 h-6 text-green-500 mt-1 flex-shrink-0" fill="none" stroke="currentColor"
                             viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                         </svg>
-                        <span>Mendukung gaya hidup berkelanjutan dengan mendaur ulang pakaian dan aksesoris</span>
+                        <span>Memberikan kegembiraan di tiap tangkai bunga</span>
                     </li>
                     <li class="flex items-start space-x-3">
                         <svg class="w-6 h-6 text-green-500 mt-1 flex-shrink-0" fill="none" stroke="currentColor"
                             viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                         </svg>
-                        <span>Memberikan akses ke fashion berkualitas dengan harga terjangkau</span>
+                        <span>Memberikan produk bunga berkualitas dengan harga terjangkau</span>
                     </li>
                     <li class="flex items-start space-x-3">
                         <svg class="w-6 h-6 text-green-500 mt-1 flex-shrink-0" fill="none" stroke="currentColor"
                             viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                         </svg>
-                        <span>Membangun komunitas pencinta fashion berkelanjutan</span>
+                        <span>Membangun komunitas pencinta bunga </span>
                     </li>
                 </ul>
             </div>
@@ -97,13 +97,13 @@
             <div class="bg-white p-8 rounded-lg shadow-sm">
                 <h2 class="text-2xl font-bold text-gray-900 mb-6">Visi Kami</h2>
                 <p class="text-gray-600 mb-6 leading-relaxed">
-                    Menjadi platform terdepan untuk jual beli produk thrift di Indonesia, menciptakan
-                    ekosistem fashion berkelanjutan yang menguntungkan semua pihak.
+                    Menjadi platform terdepan untuk jual beli produk florist di Indonesia,
+                    menciptakan ekosistem florikultura yang berkelanjutan dan menguntungkan semua pihak.
                 </p>
                 <div class="space-y-4">
                     <div class="flex items-center space-x-3">
                         <div class="w-3 h-3 bg-blue-500 rounded-full"></div>
-                        <span class="text-gray-600">Sustainable Fashion</span>
+                        <span class="text-gray-600">Sustainable Florist</span>
                     </div>
                     <div class="flex items-center space-x-3">
                         <div class="w-3 h-3 bg-green-500 rounded-full"></div>
@@ -143,8 +143,7 @@
                         </svg>
                     </div>
                     <h3 class="text-xl font-semibold text-gray-900 mb-2">Berkelanjutan</h3>
-                    <p class="text-gray-600">Berkomitmen untuk mengurangi limbah fashion dengan memperpanjang siklus hidup
-                        produk.</p>
+                    <p class="text-gray-600">Memberikan kegembiraan di tiap tangkai bunga</p>
                 </div>
 
                 <!-- Community -->
@@ -157,7 +156,7 @@
                         </svg>
                     </div>
                     <h3 class="text-xl font-semibold text-gray-900 mb-2">Komunitas</h3>
-                    <p class="text-gray-600">Membangun komunitas yang saling mendukung dalam gerakan fashion berkelanjutan.
+                    <p class="text-gray-600">Membangun komunitas yang saling mendukung dalam flower love.
                     </p>
                 </div>
             </div>
@@ -180,8 +179,8 @@
                     <div class="text-gray-600">Brand Tersedia</div>
                 </div>
                 <div>
-                    <div class="text-3xl font-bold text-orange-600 mb-2">2kg</div>
-                    <div class="text-gray-600">Limbah Tekstil Dikurangi</div>
+                    <div class="text-3xl font-bold text-orange-600 mb-2">Rating</div>
+                    <div class="text-gray-600">4.8/5</div>
                 </div>
             </div>
         </div>
@@ -190,7 +189,7 @@
         <div class="text-center">
             <h2 class="text-3xl font-bold text-gray-900 mb-4">Bergabunglah dengan Komunitas Kami</h2>
             <p class="text-lg text-gray-600 mb-8 max-w-2xl mx-auto">
-                Mulai berbelanja produk thrift berkualitas dan dukung gerakan fashion berkelanjutan bersama Vinskanna.
+                Mulai berbelanja produk florist berkualitas bersama Vinskanna.
             </p>
             <a href="/dashboard"
                 class="inline-flex items-center space-x-2 bg-gray-900 text-white px-8 py-3 rounded-lg hover:bg-gray-800 transition-colors">

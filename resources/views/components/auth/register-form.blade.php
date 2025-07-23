@@ -5,7 +5,7 @@
 
         {{-- Name Section --}}
         <div>
-            <label class="block text-sm font-medium text-gray-700 mb-4">Your Name</label>
+            <label class="block text-sm font-medium text-gray-700 mb-4">Nama Lengkap</label>
             <div class="grid grid-cols-2 gap-3">
                 <div>
                     <input id="first_name" name="first_name" type="text" value="{{ old('first_name') }}"
